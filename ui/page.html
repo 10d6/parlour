@@ -1,0 +1,421 @@
+<!-- Parlour's own page (synthkit API.md §9a), from reedorgan's index.html. -->
+<div class="cabinet">
+  <header class="topbar">
+    <div class="nameboard">
+      <svg class="fret" viewBox="0 0 320 10" aria-hidden="true"><path d="M0 5 H130 M190 5 H320" stroke="#c9a052" stroke-width="1"/><path d="M140 5 l10 -4 l10 4 l10 -4 l10 4 l-10 4 l-10 -4 l-10 4 z" fill="none" stroke="#c9a052" stroke-width="1"/></svg>
+      <h1 class="plate"><span class="plate-name">Parlour</span><span class="plate-tag">a reed organ simulator</span></h1>
+      <p class="subplate">Five sets of free reeds &middot; foot‑pumped wind &middot; fan tremolo</p>
+    </div>
+    <div class="gauge-wrap">
+      <div class="gauge-col">
+      <svg class="gauge" id="gauge" viewBox="0 0 200 122" role="img" aria-label="Wind pressure gauge">
+        <defs>
+          <radialGradient id="dial" cx="50%" cy="85%" r="85%"><stop offset="0" stop-color="#f3e8cc"/><stop offset="1" stop-color="#cdbb92"/></radialGradient>
+        </defs>
+        <path d="M10 112 A90 90 0 0 1 190 112 Z" fill="url(#dial)" stroke="#c9a052" stroke-width="4"/>
+        <path id="redzone" fill="none" stroke="#a13a4a" stroke-width="6"/>
+        <g id="ticks"></g>
+        <text x="100" y="86" text-anchor="middle" font-family="IM Fell English, Georgia, serif" font-style="italic" font-size="11" fill="#5b3d26">in. water</text>
+        <line id="needle" x1="100" y1="112" x2="100" y2="34" stroke="#2a1a10" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="100" cy="112" r="7" fill="#c9a052" stroke="#2a1a10" stroke-width="1.5"/>
+      </svg>
+      <span class="status ok" id="status" role="status">Press a key to start</span>
+      </div>
+      <div class="readouts" aria-live="off">
+        <span>Wind</span><b id="rWind">2.0&Prime;</b>
+        <span>Pitch</span><b id="rPitch">0 &cent;</b>
+        <span>Reeds</span><b id="rReeds">0</b>
+        <span>Use</span><b id="rUse">0.02/s</b>
+      </div>
+    </div>
+    <div class="top-ctrls" data-info="top">
+      <div class="field">
+        <div class="field-head info-host"><label for="volumeAmt">Volume</label><output id="volumeOut" for="volumeAmt">100%</output></div>
+        <input type="range" id="volumeAmt" min="0" max="150" step="1" value="100">
+        <p class="sub">The overall level at your speakers. Above 100%, a limiter keeps the loudest chords from distorting.</p>
+      </div>
+      <div class="field direct" data-info="direct">
+        <div class="field-head info-host"><label class="check" for="directOn"><input type="checkbox" id="directOn"> Direct wind</label><output id="airOut" for="airAmt">2.0&Prime;</output></div>
+        <input type="range" id="airAmt" min="0" max="36" step="1" value="20" disabled>
+        <div class="direct-midi"><span id="directCC">MIDI CC7 (volume knob)</span><button class="btn btn-small" id="directLearn" type="button">Learn</button></div>
+        <p class="sub">Set the air in the reservoir yourself. While this is on, the slider is the only thing that moves the wind: the treadles, the sequencer's treadle patterns and the helper pump add none, and playing uses none. 2.0&Prime; is normal wind. From a MIDI keyboard, the volume knob (CC7) or a breath controller (CC2) moves it; press Learn and turn any other knob to use that instead. With Direct wind off, the volume knob sets Volume. (In a DAW, use its own MIDI mapping for other controllers.)</p>
+      </div>
+      <div class="midi-row">
+        <span class="midi-kit" data-mount="midi"></span>
+        <button class="btn" id="panicBtn" type="button" title="Silences every note (Esc)">All notes off</button>
+      </div>
+    </div>
+    <div class="patchbar" data-info="patches">
+      <div class="patch-row">
+        <span class="patch-label info-host">Patch</span>
+        <div class="patch-kit" data-mount="presets"></div>
+        <button class="btn btn-small" id="patchImportOld" type="button">Load reedorgan patch&hellip;</button>
+        <input type="file" id="patchOldFile" accept=".json,application/json" hidden>
+      </div>
+      <p class="patch-msg" id="patchMsg" role="status" aria-live="polite"></p>
+      <p class="sub">A patch is the whole sound: the stops and couplers, the voicing, the wind and reeds, the case and room, the fan, Expression, the sequencer and Volume. Changes aren't kept until you save them; a dot by the name shows there's something unsaved. The organ opens with the sound you last played. Factory is the organ as it comes; Lay Still, Reed Choir and Vocal Lead are voices that come with it; save a change to one under a new name. Your patches are kept in this browser (in a DAW, they're shared by every copy of Parlour on the computer, and the sound is saved in your project). <em>More</em> has Save as new&hellip;, Rename, Delete, Export to file and Import from file&hellip;. <em>Load reedorgan patch&hellip;</em> brings in a patch downloaded from the earlier reed organ page. The learned MIDI controls and which panels are open are remembered on their own.</p>
+    </div>
+  </header>
+
+  <section class="rail" aria-label="Stops">
+    <div class="rail-head">
+      <p class="rail-label">Draw stops</p>
+      <label class="check" for="split">Stops
+        <select id="split">
+          <option value="none">not divided</option>
+          <option value="ef">divided at E | F (traditional)</option>
+          <option value="bc">divided at middle C</option>
+        </select>
+      </label>
+    </div>
+    <div class="stop-groups" id="stops"></div>
+    <details class="voicing" id="voicing" data-info="voicing">
+      <summary class="info-host">Rank voicing</summary>
+      <div class="voicing-body">
+        <p class="sub">Regulate each set of reeds on its own: how loud it speaks, a few cents of fine tuning, and how bright its tone is. Changes apply to notes already sounding.</p>
+        <div class="voicing-grid" id="voicingGrid"></div>
+        <div><button class="btn" id="voicingReset" type="button">Restore factory voicing</button></div>
+      </div>
+    </details>
+    <details class="vox-panel" id="voxPanel" data-info="vox">
+      <summary class="info-host">Vox Humana fan</summary>
+      <div class="vox-body">
+      <div class="vox-grid">
+        <div class="field">
+          <div class="field-head"><label for="voxRate">Speed</label><output id="voxOut" for="voxRate">9.0 Hz</output></div>
+          <input type="range" id="voxRate" min="1" max="12" step="0.1" value="9">
+        </div>
+        <div class="field">
+          <label for="voxShape" class="field-label">Shape</label>
+          <select id="voxShape">
+            <option value="sine">Smooth</option>
+            <option value="fan">Spinning fan</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="voxBladeAmt">Blade size</label><output id="voxBladeOut" for="voxBladeAmt">above 1.5 kHz</output></div>
+          <input type="range" id="voxBladeAmt" min="0" max="100" step="1" value="52">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="voxShadowAmt">Blade shadow</label><output id="voxShadowOut" for="voxShadowAmt">50%</output></div>
+          <input type="range" id="voxShadowAmt" min="0" max="100" step="1" value="50">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="voxShimmerAmt">Shimmer</label><output id="voxShimmerOut" for="voxShimmerAmt">10%</output></div>
+          <input type="range" id="voxShimmerAmt" min="0" max="100" step="1" value="10">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="voxStereoAmt">Stereo sweep</label><output id="voxStereoOut" for="voxStereoAmt">Off</output></div>
+          <input type="range" id="voxStereoAmt" min="0" max="100" step="1" value="0">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="voxWholeAmt">Whole-sound wobble</label><output id="voxWholeOut" for="voxWholeAmt">Off</output></div>
+          <input type="range" id="voxWholeAmt" min="0" max="60" step="1" value="0">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="voxLidAmt">Lid wobble</label><output id="voxLidOut" for="voxLidAmt">Off</output></div>
+          <input type="range" id="voxLidAmt" min="0" max="100" step="1" value="0">
+        </div>
+      </div>
+      <p class="sub" id="voxSub"></p>
+      <p class="sub">The fan stirs the sound after it leaves the reeds, so it only catches the upper harmonics: those above the blade-size frequency. Blade shadow is the flicker as blades pass; Shimmer is the phasing from sound bouncing off the moving blades; Stereo sweep moves those upper harmonics side to side. The fundamentals stay steady. Whole-sound wobble and Lid wobble are the earlier tremolo, which pulses everything; they're off by default.</p>
+      </div>
+    </details>
+    <details class="vox-panel" id="exprPanel" data-info="expression">
+      <summary class="info-host">Expression</summary>
+      <div class="vox-body">
+      <p class="expr-label">Scoop</p>
+      <div class="vox-grid">
+        <div class="field">
+          <div class="field-head"><label for="scoopDepthAmt">Scoop</label><output id="scoopDepthOut" for="scoopDepthAmt">Off</output></div>
+          <input type="range" id="scoopDepthAmt" min="0" max="200" step="5" value="0">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="scoopTimeAmt">Scoop time</label><output id="scoopTimeOut" for="scoopTimeAmt">120 ms</output></div>
+          <input type="range" id="scoopTimeAmt" min="40" max="300" step="10" value="120">
+        </div>
+        <div class="field">
+          <label for="scoopMode" class="field-label">Scoop on</label>
+          <select id="scoopMode">
+            <option value="top">Top voice</option>
+            <option value="leaps">Top voice, leaps up</option>
+            <option value="all">Every note</option>
+            <option value="velocity">Every note, by velocity</option>
+            <option value="accent">Accents, past Crossover</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="scoopCrossAmt">Crossover</label><output id="scoopCrossOut" for="scoopCrossAmt">velocity 90</output></div>
+          <input type="range" id="scoopCrossAmt" min="1" max="127" step="1" value="90">
+        </div>
+        <div class="field">
+          <label for="scoopCurve" class="field-label">Curve</label>
+          <select id="scoopCurve">
+            <option value="ease">Ease in</option>
+            <option value="smooth">S-curve</option>
+            <option value="snap">Late snap</option>
+          </select>
+        </div>
+      </div>
+      <p class="expr-label">Vibrato</p>
+      <div class="vox-grid">
+        <div class="field">
+          <div class="field-head"><label for="vibDepthAmt">Vibrato</label><output id="vibDepthOut" for="vibDepthAmt">Off</output></div>
+          <input type="range" id="vibDepthAmt" min="0" max="100" step="2" value="0">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="vibRateAmt">Rate</label><output id="vibRateOut" for="vibRateAmt">5.5 Hz</output></div>
+          <input type="range" id="vibRateAmt" min="3" max="8" step="0.1" value="5.5">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="vibDelayAmt">Delay</label><output id="vibDelayOut" for="vibDelayAmt">400 ms</output></div>
+          <input type="range" id="vibDelayAmt" min="0" max="2500" step="50" value="400">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="vibFadeAmt">Fade in</label><output id="vibFadeOut" for="vibFadeAmt">500 ms</output></div>
+          <input type="range" id="vibFadeAmt" min="0" max="1500" step="50" value="500">
+        </div>
+        <div class="field">
+          <label for="vibMode" class="field-label">Vibrato on</label>
+          <select id="vibMode">
+            <option value="top">Top voice</option>
+            <option value="all">Every note</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="vibNaturalAmt">Natural variation</label><output id="vibNaturalOut" for="vibNaturalAmt">50%</output></div>
+          <input type="range" id="vibNaturalAmt" min="0" max="100" step="5" value="50">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="vibColourAmt">Voice colour</label><output id="vibColourOut" for="vibColourAmt">30%</output></div>
+          <input type="range" id="vibColourAmt" min="0" max="100" step="5" value="30">
+        </div>
+        <div class="field">
+          <span class="field-label">Delay control</span>
+          <div class="direct-midi"><span id="vibCC">No controller</span><button class="btn btn-small" id="vibLearn" type="button">Learn</button><button class="btn btn-small" id="vibForget" type="button" hidden>Clear</button></div>
+        </div>
+      </div>
+      <p class="expr-label">Wheels</p>
+      <div class="vox-grid">
+        <div class="field">
+          <div class="field-head"><label for="bendRangeAmt">Bend range</label><output id="bendRangeOut" for="bendRangeAmt">&plusmn;2 semitones</output></div>
+          <input type="range" id="bendRangeAmt" min="0" max="12" step="1" value="2">
+        </div>
+      </div>
+      <p class="sub">Playing gestures from singing, horns and blues harmonica rather than from the reed organ itself. Scoop starts a note below its pitch and slides up into it, landing exactly in tune at the end of Scoop time (or when the reed reaches full voice, if that's later). Every reed on the key, and its coupled octaves, bends together. Top voice scoops only the highest note you're holding, so a melody bends over a steady chord; leaps up scoops it only when it jumps up a minor third or more; by velocity scoops harder-struck notes deeper (mouse and computer keys count as fairly hard). Accents scoops only notes struck at or past the Crossover velocity, the full amount or not at all; mouse and computer keys count as 100. Ease in moves fastest at first and settles; S-curve holds low a moment, then rises, for a more obvious bend; Late snap holds below longest and speeds up all the way into the note.</p>
+      <p class="sub">Vibrato waits for the note to settle, then grows in, as a singer's does: short notes never get it, long ones bloom. Delay counts from when the scoop lands; Never leaves it to a controller. Top voice gives the vibrato to the highest note you're holding and moves it to each new top note. Natural variation makes it start a little slow and speed up as it grows, and lets its rate and width wander slightly, as a voice's do. Voice colour brightens the tone as the pitch rises and darkens it as it falls, like a singer's harmonics passing through the resonances of the mouth.</p>
+      <p class="sub">Delay control: press Learn and move any knob, slider or pedal on a MIDI controller. All the way down is Never, all the way up is no delay, so pushing it brings the vibrato in sooner, even on a note you're already holding. A MIDI keyboard's mod wheel sets Scoop (unless you learn it for the delay), and its pitch wheel bends every sounding note by up to Bend range.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="console" aria-label="Playing" data-info="play">
+    <div class="ctrls">
+      <div class="field">
+        <div class="field-head info-host"><label for="swellAmt">Knee swell</label><output id="swellOut" for="swellAmt">Closed</output></div>
+        <input type="range" id="swellAmt" min="0" max="100" step="1" value="0">
+        <p class="sub">Opens the swell lid: louder and brighter, but it uses more wind. A MIDI expression pedal (CC11 or CC4) moves it too.</p>
+      </div>
+      <p class="hint">Hold <kbd>&larr;</kbd> <kbd>&rarr;</kbd> (or <kbd>Space</kbd>) to work the treadles. Play with <kbd>Z</kbd>&ndash;<kbd>M</kbd> for the low octave and <kbd>Q</kbd>&ndash;<kbd>U</kbd> and up for the middle. <kbd>Esc</kbd> silences everything.</p>
+    </div>
+  </section>
+
+  <section class="keybed" aria-label="Keyboard">
+    <div class="keys" id="keys"></div>
+  </section>
+
+  <section aria-label="Treadles" data-info="treadles">
+    <div class="sec-head">
+      <h2 class="info-host">Treadles</h2>
+      <div class="sec-checks">
+        <label class="check" for="easyWind"><input type="checkbox" id="easyWind"> Easy wind</label>
+        <label class="check" for="link"><input type="checkbox" id="link" checked> Same envelope for both feet</label>
+      </div>
+    </div>
+    <p class="sub" style="margin:0 0 14px"><strong>Easy wind</strong> charges the bellows for no more than three notes on a single stop, however much you play, so full chords and extra stops don't need harder pumping. The sound doesn't change. Each treadle feeds air through its own envelope. Pressing starts the attack; holding keeps the sustain flowing; letting go starts the release. Times run up to 30 seconds.</p>
+    <div class="rail seq" id="seq" data-info="seq">
+      <p class="rail-label info-host">Modulation sequencer</p>
+      <div class="seq-head">
+        <div class="field" id="tempoField">
+          <div class="field-head"><label for="tempoAmt">Tempo</label><output id="tempoOut" for="tempoAmt">100 bpm</output></div>
+          <input type="range" id="tempoAmt" min="30" max="200" step="1" value="100">
+        </div>
+        <div class="field" id="tempoHostField" hidden>
+          <div class="field-head"><span class="field-label">Tempo</span><output id="tempoHost">follows your DAW</output></div>
+        </div>
+        <div class="field">
+          <label for="seqMeter" class="field-label">Time</label>
+          <select id="seqMeter"></select>
+        </div>
+        <div class="field">
+          <label for="seqBars" class="field-label">Length</label>
+          <select id="seqBars"></select>
+        </div>
+        <div class="field">
+          <label for="seqTrigger" class="field-label">Starts on</label>
+          <select id="seqTrigger"><option value="first">First note</option><option value="each">Each note</option></select>
+        </div>
+      </div>
+      <div class="seq-tabs" id="seqLanes" role="tablist" aria-label="Patterns"></div>
+      <div class="seq-head seq-lane-head">
+        <label class="check" for="seqOn"><input type="checkbox" id="seqOn"> Play this pattern</label>
+        <div class="field seq-amount">
+          <div class="field-head"><label for="seqAmountAmt">Amount</label><output id="seqAmountOut" for="seqAmountAmt">100% of a stroke</output></div>
+          <input type="range" id="seqAmountAmt" min="0" max="100" step="1" value="100">
+        </div>
+        <button class="btn btn-small" id="seqClear" type="button">Clear pattern</button>
+      </div>
+      <div class="seq-roll"><div class="seq-grid" id="seqGrid" role="group" aria-label="Left treadle pattern"></div></div>
+      <p class="sub">One pattern for each thing it moves, all playing together: the left and right treadles, Direct wind (0&Prime; to 3.6&Prime;), the Vox Humana fan's speed (1 to 12 Hz) and the knee swell (closed to open). Pick a pattern above to see and edit it; a lit lamp means it's playing. The treadle patterns pump the organ: they start with the first touch and keep going between phrases, a sweep up pressing the pedal and a sweep down letting it up. The others start on the first note of a phrase (or on each note) and loop while you hold keys.</p>
+      <p class="sub">A piano roll of sweeps in 16th notes. Each row is a shape, rising or falling; tap a square to put that shape there, and drag either end of a note to stretch it backwards or forwards. Tap a note to select it: Backspace removes it, Shift with the arrow keys stretches it, Alt with the arrow keys shortens it. One shape plays at a time in a pattern, so a new note replaces any note it lands on. Each note moves its control by that pattern's Amount, starting from wherever the last note left it, and it holds still between notes; a sweep that reaches either end of the range stops there. Every pass starts from the control's own setting, which the sequencer never moves. Tempo counts quarter notes, or eighth notes in 6/8. In a DAW the sequencer follows the song's tempo instead, counting quarter notes in every time signature.</p>
+      <p class="sub">Turning a pattern on turns on what it moves: Direct wind, or the Vox Humana stop. Direct wind and the treadles can't both supply the air: the treadle patterns rest while Direct wind is on, and turning one on turns Direct wind off. Your own feet still work alongside, and the helper pump adds a trickle on top.</p>
+    </div>
+    <div class="feet" id="feet"></div>
+  </section>
+
+  <section aria-label="Adjustments" data-info="adjust">
+    <div class="sec-head"><h2 class="info-host">Adjustments</h2></div>
+    <p class="sub" style="margin:0 0 14px">The regulator's bench: how the wind behaves, how the reeds speak, and the space around the organ.</p>
+    <div class="adjust-grid">
+      <div class="rail" data-info="wind">
+        <p class="rail-label info-host">Wind</p>
+        <div class="field">
+          <div class="field-head"><label for="helper">Helper pump</label><output id="helperOut" for="helper">2% &middot; 0.01/s</output></div>
+          <input type="range" id="helper" min="0" max="100" step="1" value="2">
+          <p class="sub">An invisible assistant pumps at a steady rate. Below what you're playing, the wind slowly runs out.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="resAmt">Reservoir size</label><output id="resOut" for="resAmt">1.0×</output></div>
+          <input type="range" id="resAmt" min="0" max="100" step="1" value="45">
+          <p class="sub">A bigger reservoir holds a chord longer but takes more pumping to fill.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="sensAmt">Pitch drift</label><output id="sensOut" for="sensAmt">10 &cent;</output></div>
+          <input type="range" id="sensAmt" min="0" max="25" step="1" value="10">
+          <p class="sub">How far the pitch moves between empty and full wind. Like any free reed, these go flat as you blow harder and sharpen as the wind fades. Low is a well-regulated organ, high a worn one.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="driftVarAmt">Drift variation</label><output id="driftVarOut" for="driftVarAmt">40%</output></div>
+          <input type="range" id="driftVarAmt" min="0" max="100" step="1" value="40">
+          <p class="sub">Reeds are tuned at normal wind, but each one wanders a little differently as the wind rises and falls, low reeds more than high. Reeds on different keys drift apart and back together as you pump; reeds held in step by Unison pull drift together.</p>
+        </div>
+      </div>
+      <div class="rail" data-info="wind-tone">
+        <p class="rail-label info-host">Wind tone</p>
+        <div class="field">
+          <label for="toneModel" class="field-label">Tone model</label>
+          <select id="toneModel">
+            <option value="tilt">Natural tilt</option>
+            <option value="sweep">Filter sweep (original)</option>
+          </select>
+          <p class="sub" id="toneModelSub"></p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="toneDepthAmt">Depth</label><output id="toneDepthOut" for="toneDepthAmt">60%</output></div>
+          <input type="range" id="toneDepthAmt" min="0" max="150" step="5" value="60">
+          <p class="sub">How much the tone changes between empty and full wind. Loudness still follows the wind at any setting.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="toneQAmt">Resonance</label><output id="toneQOut" for="toneQAmt">Q 0.70</output></div>
+          <input type="range" id="toneQAmt" min="0" max="100" step="1" value="12">
+          <p class="sub">The peak at the edge of the swell filter. Low is smooth; high adds a vocal, nasal bump that makes any movement more obvious.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="toneRespAmt">Response</label><output id="toneRespOut" for="toneRespAmt">250 ms</output></div>
+          <input type="range" id="toneRespAmt" min="0" max="100" step="1" value="55">
+          <p class="sub">How quickly the tone follows the wind. Slower smooths out the ripple from each treadle stroke.</p>
+        </div>
+      </div>
+      <div class="rail" data-info="reeds">
+        <p class="rail-label info-host">Reeds</p>
+        <div class="field">
+          <div class="field-head"><label for="speechAmt">Speech speed</label><output id="speechOut" for="speechAmt">1.0×</output></div>
+          <input type="range" id="speechAmt" min="0" max="100" step="1" value="33">
+          <p class="sub">How slowly each note blooms in. Higher is slower. Low reeds always take longer to get going than high ones, and low wind slows them all.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="bloomAmt">Tone bloom</label><output id="bloomOut" for="bloomAmt">18 dB</output></div>
+          <input type="range" id="bloomAmt" min="0" max="30" step="1" value="18">
+          <p class="sub">How dark each note starts. A reed swinging gently is almost a pure tone; its buzz fills in as the swing grows. Off starts every note at full colour.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="scoopAmt">Speech glide</label><output id="scoopOut" for="scoopAmt">5 &cent;</output></div>
+          <input type="range" id="scoopAmt" min="0" max="40" step="1" value="5">
+          <p class="sub">How far sharp each note starts before it settles. A reed speaks near its natural pitch and sinks a little as its swing grows.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="beatAmt">Celeste beat</label><output id="beatOut" for="beatAmt">1.5 /s</output></div>
+          <input type="range" id="beatAmt" min="0.5" max="6" step="0.1" value="1.5">
+          <p class="sub">How fast the Celeste shimmers against the other 8&prime; ranks, the same on every note.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="scatterAmt">Reed scatter</label><output id="scatterOut" for="scatterAmt">&plusmn;1.0 &cent;</output></div>
+          <input type="range" id="scatterAmt" min="0" max="5" step="0.1" value="1">
+          <p class="sub">Each reed's own small tuning error, different on every key and every rank, so beats between reeds never line up into a pattern.</p>
+          <div><button class="btn" id="newReeds" type="button">Fit a new set of reeds</button></div>
+        </div>
+        <div class="field">
+          <label for="compass" class="field-label">Keyboard compass</label>
+          <select id="compass">
+            <option value="full">Full range, A0 to C8</option>
+            <option value="organ">Reed organ, 61 keys F to F</option>
+          </select>
+          <p class="sub">Which notes the organ has. Full range plays every note a MIDI keyboard or a coupler reaches, including deep notes no reed organ had. Reed organ keeps to a real five-octave compass, so couplers fall silent past its ends.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="pullAmt">Unison pull</label><output id="pullOut" for="pullAmt">3.0 &cent;</output></div>
+          <input type="range" id="pullAmt" min="0" max="10" step="0.5" value="3">
+          <p class="sub">Reeds on the same key that sound in unison or octaves, and are tuned within this many cents of each other, pull into step and sound as one instead of beating slowly. The Celeste never locks. Off lets every reed beat freely.</p>
+        </div>
+      </div>
+      <div class="rail" data-info="case-and-room">
+        <p class="rail-label info-host">Case and room</p>
+        <div class="field">
+          <div class="field-head"><label for="cabAmt">Cabinet</label><output id="cabOut" for="cabAmt">45%</output></div>
+          <input type="range" id="cabAmt" min="0" max="100" step="1" value="45">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="roomAmt">Room</label><output id="roomOut" for="roomAmt">30%</output></div>
+          <input type="range" id="roomAmt" min="0" max="100" step="1" value="30">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="bassCutAmt">Cabinet bass</label><output id="bassCutOut" for="bassCutAmt">below 80 Hz</output></div>
+          <input type="range" id="bassCutAmt" min="0" max="100" step="1" value="60">
+          <p class="sub">A reed organ's case can't radiate the deepest notes, so their pitch comes from the harmonics and the bass sounds reedy rather than booming. Lower this for a deeper, fuller bass; Off keeps everything.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="breathAmt">Breath noise</label><output id="breathOut" for="breathAmt">100%</output></div>
+          <input type="range" id="breathAmt" min="0" max="300" step="5" value="100">
+          <p class="sub">The hiss of air through the reed cells. It still follows the wind and how many notes are playing.</p>
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="thumpAmt">Treadle noise</label><output id="thumpOut" for="thumpAmt">30%</output></div>
+          <input type="range" id="thumpAmt" min="0" max="100" step="1" value="30">
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="notes">
+  <h2>Things to listen for</h2>
+  <div><h3>Let the organ pump itself</h3><p>The modulation sequencer's treadle patterns work the pedals while you play: right on beat 1, left on beat 2. Hold a big chord and watch the gauge sink between strokes. Add strokes on beats 3 and 4 (a quick sweep up, then a sweep down) or raise the tempo, and the wind holds. Longer, gentler sweeps make slower strokes.</p></div>
+  <div><h3>Easy wind</h3><p>Draw every stop and hold a big chord: the gauge sinks. Tick Easy wind and it climbs back and stays put. The reeds sound the same; the Use readout shows the air of only three of them.</p></div>
+  <div><h3>Let the wind run out</h3><p>Turn off both treadle patterns in the modulation sequencer, set the helper low, hold a chord and stop pumping. The sound gets quieter, then darker, and creeps a few cents sharp before the reeds stop speaking.</p></div>
+  <div><h3>Pump harder</h3><p>Strong, alternating strokes push the reeds harder. They get brighter and buzzier, and the pitch sinks a few cents flat. Push too hard and the relief valve vents.</p></div>
+  <div><h3>Slow-motion feet</h3><p>Give a treadle a long attack and release. The organ swells in and fades away on its own, like a very patient player.</p></div>
+  <div><h3>The shimmer</h3><p>Draw Celeste with Diapason. The Celeste reeds are tuned a little sharp so the two ranks beat against each other in a slow wave. Celeste beat sets how fast, the same on every note.</p></div>
+  <div><h3>Melody and accompaniment</h3><p>Divide the stops, then draw soft Melodia in the bass and Diapason with Celeste in the treble. The tune sings out over a quiet accompaniment.</p></div>
+  <div><h3>Swell and fan</h3><p>Vox Humana spins a little fan in front of the reeds. The fundamentals hold steady while the upper harmonics flicker and swirl. Try the Spinning fan shape with some Stereo sweep, and listen to it coast down when you push the stop in. The knee swell opens the lid gradually: about 6 dB louder and brighter, but it drinks wind faster.</p></div>
+  <div><h3>Living tuning</h3><p>Hold a chord with Diapason and Melodia and pump unevenly. Each key drifts at its own pace, so the intervals between keys never settle into one pattern. Fit a new set of reeds to hear a different instrument.</p></div>
+  <div><h3>How a reed speaks</h3><p>Play a low C, then a high one, slowly. The low reed takes a moment to get going and starts almost as a pure hum before its buzz fills in; the high one speaks at once. Low wind makes every reed slower. Tone bloom sets how dark notes start.</p></div>
+  <div><h3>Reeds in step</h3><p>Hold one note with Diapason and Melodia. The two ranks pull together and sound as one steady tone. Set Unison pull to Off and the same note swells and fades slowly as the two reeds drift past each other.</p></div>
+  <div><h3>Deep notes</h3><p>Draw the Bourdon alone and play the bottom of the keyboard. The case rolls off the deepest fundamentals, so the bass sounds reedy, as on a real organ. Set Cabinet bass to Off for a fuller, deeper bass, and choose Full range to play notes below any reed organ from a MIDI keyboard.</p></div>
+  <div><h3>Couplers</h3><p>Draw Sub Octave and hold a chord: the keys an octave down sink with yours, and the bass grows heavy. Every coupled note is another set of reeds drinking wind.</p></div>
+  <div><h3>Scoop into the tune</h3><p>Open Expression and set Scoop to a semitone. Hold a chord in the left hand and play a melody above it: each melody note slides up into pitch and lands dead in tune, while the chord stays put. Try S-curve for a more obvious bend, Top voice, leaps up so only the jumps scoop, or the mod wheel to ride the depth as you play.</p></div>
+  <div><h3>Let long notes sing</h3><p>Open Expression and set Vibrato to about &plusmn;30 &cent;. Play a quick run, then hold the last note: the run stays plain and the held note settles, then blooms into vibrato. Add a semitone of Scoop and the vibrato waits for each note to land first. Natural variation keeps it from sounding like a machine; Voice colour makes the tone shimmer with it. Set Delay to Never and Learn a knob or pedal to bring the vibrato in yourself.</p></div>
+  <div><h3>Let the pattern breathe</h3><p>In the modulation sequencer, pick Knee swell and tick Play this pattern. Hold a chord: the lid opens and closes every bar, in time with the treadles. Tap squares to add sweeps of your own, drag their ends to stretch them, and raise Amount for deeper swells. Set Starts on to Each note for a swell that restarts with every chord. Fan speed makes the Vox Humana race and slow in time; Direct wind takes over the air from the treadles and swells it.</p></div>
+  <div><h3>Try the voices</h3><p>Pick Lay Still, Reed Choir or Vocal Lead from the patch menu. Lay Still breathes slowly through a soft Bourdon and Melodia with the fan turning; Reed Choir lets every note bloom into a wandering vibrato after a moment; Vocal Lead sings a melody on top with its own vibrato. They&rsquo;re quieter than Factory: raise Direct wind or Volume to taste, then save your version from <em>More</em>, Save as new&hellip;.</p></div>
+  <div><h3>Keep a sound</h3><p>Draw the stops you like, shape the fan or the sequencer, then choose <em>More</em>, Save as new&hellip; in the patch bar and give it a name. Switch between your patches and Factory while holding a chord: the whole sound changes at once. Next time you open the organ it starts with the sound you last played; Export to file keeps a copy. In a DAW, the sound is saved with your project.</p></div>
+  <div><h3>Voice your own organ</h3><p>Open Rank voicing under Adjustments. Darken the Diapason, brighten the Principal, or detune a rank a few cents to hear how much a regulator's touch changes the instrument.</p></div>
+</section>

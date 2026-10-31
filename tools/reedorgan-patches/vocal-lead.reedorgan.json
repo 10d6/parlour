@@ -1,0 +1,190 @@
+{
+  "app": "parlor-reed-organ",
+  "kind": "patch",
+  "version": 1,
+  "name": "Vocal Lead",
+  "settings": {
+    "directAir": 9,
+    "directWind": true,
+    "swell": 0,
+    "reservoir": 45,
+    "sensitivity": 10,
+    "driftVariation": 40,
+    "toneModel": "tilt",
+    "toneDepth": 60,
+    "toneQ": 12,
+    "toneResponse": 55,
+    "bassCut": 60,
+    "speech": 78,
+    "bloom": 30,
+    "scoop": 5,
+    "reedScatter": 1,
+    "reedSeed": 1,
+    "unisonPull": 3,
+    "celesteBeat": 1.5,
+    "breath": 100,
+    "v-level-bourdon": 100,
+    "v-tune-bourdon": 0,
+    "v-bright-bourdon": 0,
+    "v-level-diapason": 100,
+    "v-tune-diapason": 0,
+    "v-bright-diapason": 0,
+    "v-level-melodia": 100,
+    "v-tune-melodia": 0,
+    "v-bright-melodia": 0,
+    "v-level-celeste": 100,
+    "v-tune-celeste": 0,
+    "v-bright-celeste": 0,
+    "v-level-principal": 100,
+    "v-tune-principal": 0,
+    "v-bright-principal": 0,
+    "cab": 84,
+    "room": 100,
+    "thump": 30,
+    "voxRate": 9.9,
+    "voxShape": "sine",
+    "voxBlade": 35,
+    "voxShadow": 61,
+    "voxShimmer": 7,
+    "voxStereo": 0,
+    "voxWhole": 0,
+    "voxLid": 0,
+    "scoopDepth": 0,
+    "scoopTime": 120,
+    "bendRange": 2,
+    "scoopCross": 90,
+    "vibDepth": 22,
+    "vibRate": 5.5,
+    "vibDelay": 400,
+    "vibFade": 500,
+    "vibNatural": 50,
+    "vibColour": 30,
+    "scoopMode": "top",
+    "scoopCurve": "ease",
+    "vibMode": "top",
+    "autoTempo": 74,
+    "helper": 2,
+    "split": "ef",
+    "stops": {
+      "bass": {
+        "bourdon": true,
+        "diapason": false,
+        "melodia": true,
+        "celeste": false,
+        "principal": false
+      },
+      "treble": {
+        "bourdon": false,
+        "diapason": false,
+        "melodia": true,
+        "celeste": false,
+        "principal": false
+      },
+      "vox": false,
+      "sub": false,
+      "sup": true
+    },
+    "compass": "full",
+    "easyWind": false,
+    "link": true,
+    "envL": {
+      "a": 0.06,
+      "d": 0.3,
+      "s": 0,
+      "r": 0.15
+    },
+    "envR": {
+      "a": 0.06,
+      "d": 0.3,
+      "s": 0,
+      "r": 0.15
+    },
+    "seq": {
+      "meter": "4/4",
+      "bars": 1,
+      "lanes": {
+        "left": {
+          "on": true,
+          "amount": 1,
+          "notes": [
+            {
+              "row": "up-fast",
+              "start": 4,
+              "len": 1
+            },
+            {
+              "row": "down-fast",
+              "start": 5,
+              "len": 2
+            }
+          ]
+        },
+        "right": {
+          "on": true,
+          "amount": 1,
+          "notes": [
+            {
+              "row": "up-fast",
+              "start": 0,
+              "len": 1
+            },
+            {
+              "row": "down-fast",
+              "start": 1,
+              "len": 2
+            }
+          ]
+        },
+        "direct": {
+          "on": true,
+          "amount": 0.05,
+          "notes": [
+            {
+              "row": "up-fast",
+              "start": 0,
+              "len": 8
+            },
+            {
+              "row": "down-linear",
+              "start": 8,
+              "len": 8
+            }
+          ]
+        },
+        "fan": {
+          "on": false,
+          "amount": 0.25,
+          "notes": [
+            {
+              "row": "up-s",
+              "start": 0,
+              "len": 8
+            },
+            {
+              "row": "down-s",
+              "start": 8,
+              "len": 8
+            }
+          ]
+        },
+        "swell": {
+          "on": false,
+          "amount": 0.25,
+          "notes": [
+            {
+              "row": "up-s",
+              "start": 0,
+              "len": 8
+            },
+            {
+              "row": "down-s",
+              "start": 8,
+              "len": 8
+            }
+          ]
+        }
+      },
+      "trigger": "first"
+    }
+  }
+}

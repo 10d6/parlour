@@ -1,0 +1,188 @@
+{
+  "synthkit": 1,
+  "synth": "parlour",
+  "patchVersion": 1,
+  "name": "Vocal Lead",
+  "author": "Parlour",
+  "tags": [],
+  "params": {
+    "wind.air": 0.9,
+    "wind.direct": 1,
+    "swell": 0,
+    "wind.reservoir": 0.9904614110830812,
+    "wind.drift": 10,
+    "wind.driftVar": 40,
+    "tone.model": 0,
+    "tone.depth": 60,
+    "tone.q": 0.6973718331752027,
+    "tone.response": 0.2517850823588335,
+    "cab.bass": 79.62143411069944,
+    "reed.speech": 2.5315131879405603,
+    "reed.bloom": 30,
+    "reed.glide": 5,
+    "reed.scatter": 1,
+    "reed.seed": 1,
+    "reed.pull": 3,
+    "reed.celeste": 1.5,
+    "reed.breath": 100,
+    "cab.mix": 84,
+    "room.mix": 100,
+    "treadle.noise": 30,
+    "vox.speed": 9.9,
+    "vox.shape": 0,
+    "vox.blade": 2059.1687180039908,
+    "vox.shadow": 61,
+    "vox.shimmer": 7,
+    "vox.stereo": 0,
+    "vox.whole": 0,
+    "vox.lid": 0,
+    "scoop.depth": 0,
+    "scoop.time": 0.12,
+    "bendRange": 2,
+    "scoop.cross": 90,
+    "vib.depth": 22,
+    "vib.rate": 5.5,
+    "vib.delay": 0.4,
+    "vib.fade": 0.5,
+    "vib.natural": 50,
+    "vib.colour": 30,
+    "scoop.mode": 0,
+    "scoop.curve": 0,
+    "vib.mode": 0,
+    "seq.tempo": 74,
+    "wind.helper": 2,
+    "stops.split": 1,
+    "compass": 0,
+    "wind.easy": 0,
+    "pedal.link": 1,
+    "voice.bourdon.level": 100,
+    "voice.bourdon.tune": 0,
+    "voice.diapason.level": 100,
+    "voice.diapason.tune": 0,
+    "voice.melodia.level": 100,
+    "voice.melodia.tune": 0,
+    "voice.celeste.level": 100,
+    "voice.celeste.tune": 0,
+    "voice.principal.level": 100,
+    "voice.principal.tune": 0,
+    "stop.bass.bourdon": 1,
+    "stop.bass.diapason": 0,
+    "stop.bass.melodia": 1,
+    "stop.bass.celeste": 0,
+    "stop.bass.principal": 0,
+    "stop.treble.bourdon": 0,
+    "stop.treble.diapason": 0,
+    "stop.treble.melodia": 1,
+    "stop.treble.celeste": 0,
+    "stop.treble.principal": 0,
+    "stop.vox": 0,
+    "stop.sub": 0,
+    "stop.sup": 1,
+    "pedal.left.attack": 0.06,
+    "pedal.left.decay": 0.3,
+    "pedal.left.sustain": 0,
+    "pedal.left.release": 0.15,
+    "pedal.right.attack": 0.06,
+    "pedal.right.decay": 0.3,
+    "pedal.right.sustain": 0,
+    "pedal.right.release": 0.15
+  },
+  "custom": {
+    "voicing": {
+      "bright": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "seq": {
+      "meter": "4/4",
+      "bars": 1,
+      "lanes": {
+        "left": {
+          "on": true,
+          "amount": 1,
+          "notes": [
+            {
+              "row": "up-fast",
+              "start": 4,
+              "len": 1
+            },
+            {
+              "row": "down-fast",
+              "start": 5,
+              "len": 2
+            }
+          ]
+        },
+        "right": {
+          "on": true,
+          "amount": 1,
+          "notes": [
+            {
+              "row": "up-fast",
+              "start": 0,
+              "len": 1
+            },
+            {
+              "row": "down-fast",
+              "start": 1,
+              "len": 2
+            }
+          ]
+        },
+        "direct": {
+          "on": true,
+          "amount": 0.05,
+          "notes": [
+            {
+              "row": "up-fast",
+              "start": 0,
+              "len": 8
+            },
+            {
+              "row": "down-linear",
+              "start": 8,
+              "len": 8
+            }
+          ]
+        },
+        "fan": {
+          "on": false,
+          "amount": 0.25,
+          "notes": [
+            {
+              "row": "up-s",
+              "start": 0,
+              "len": 8
+            },
+            {
+              "row": "down-s",
+              "start": 8,
+              "len": 8
+            }
+          ]
+        },
+        "swell": {
+          "on": false,
+          "amount": 0.25,
+          "notes": [
+            {
+              "row": "up-s",
+              "start": 0,
+              "len": 8
+            },
+            {
+              "row": "down-s",
+              "start": 8,
+              "len": 8
+            }
+          ]
+        }
+      },
+      "trigger": "first"
+    }
+  }
+}

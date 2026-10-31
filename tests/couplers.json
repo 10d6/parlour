@@ -1,0 +1,66 @@
+{
+ "patch": "init",
+ "params": {
+  "stop.sub": 1,
+  "stop.sup": 1,
+  "wind.easy": 1,
+  "treadle.noise": 0
+ },
+ "events": [
+  {
+   "t": 0,
+   "msg": "clock.own",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 0.0,
+   "on": 48,
+   "vel": 100
+  },
+  {
+   "t": 0.0,
+   "on": 52,
+   "vel": 100
+  },
+  {
+   "t": 0.0,
+   "on": 55,
+   "vel": 100
+  },
+  {
+   "t": 0.0,
+   "on": 60,
+   "vel": 100
+  },
+  {
+   "t": 2.5,
+   "off": 48
+  },
+  {
+   "t": 2.5,
+   "off": 52
+  },
+  {
+   "t": 2.5,
+   "off": 55
+  },
+  {
+   "t": 2.5,
+   "off": 60
+  }
+ ],
+ "length": 7.0,
+ "expect": {
+  "soundBy": 0.15,
+  "silentAfter": 6.5,
+  "peakBelow": -0.5,
+  "levelAt": [
+   {
+    "t": 1.5,
+    "above": -30
+   }
+  ]
+ }
+}

@@ -2,6 +2,8 @@
   "synthkit": 1,
   "synth": "parlour",
   "patchVersion": 1,
-  "name": "Init",
+  "name": "Factory",
+  "author": "Parlour",
+  "tags": [],
   "params": {}
 }

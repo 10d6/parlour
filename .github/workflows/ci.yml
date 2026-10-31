@@ -63,6 +63,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Check the page in Chromium
         run: node synthkit/web/test/browser-test.cjs build-web/web/${SYNTH}.html web-test $SCENARIO
+      - name: Play Parlour's own page (stops, keys, treadles, sequencer, patches; browser and plugin window)
+        run: node tests/page-test.cjs build-web/web/${SYNTH}.html web-test/page
       - name: Browser output matches the native engine
         run: |
           ./build/${SYNTH}_render $SCENARIO --block 128 --out web-test/native.wav
@@ -75,6 +77,7 @@ jobs:
           path: |
             build-web/web/${{ env.SYNTH }}.html
             web-test/*.png
+            web-test/page/*.png
           if-no-files-found: ignore
           retention-days: 30
 
