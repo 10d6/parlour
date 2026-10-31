@@ -1,0 +1,341 @@
+/* Parlour: reedorgan's walnut cabinet (css/organ.css), loaded after the
+   kit's styles. The kit's colour variables are set to match, so its preset
+   bar and Connect MIDI button sit in the cabinet. */
+@import url("https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Alegreya:ital,wght@0,400;0,500;1,400&display=swap");
+html{-webkit-text-size-adjust:100%}
+:root,:root[data-theme]{
+  --accent-base:#c9a052;--accent:#c9a052;--bg:#1c110b;--panel:#2a1810;--edge:#7d6230;
+  --ink:#ebdcbc;--ink-soft:#b5a07e;--field:#2e1a10;--track:#5b3622;--cap:#15100c;--cap-hi:#4a2c1c;
+  --font:"Alegreya",Georgia,"Times New Roman",serif;
+  color-scheme:dark;
+}
+/* Layout: one walnut cabinet read top to bottom like the instrument itself:
+   name board → stop rail → wind gauge + controls → keys → treadles with their envelopes → listening notes.
+   Deliberately single-theme (a dark wood cabinet looks the same in any room). */
+:root{
+  --wood-deep:#1c110b;
+  --wood:#3a2116;
+  --wood-hi:#5b3622;
+  --rail:#2a1810;
+  --ivory:#eee3c6;
+  --ivory-shade:#cdbd96;
+  --ebony:#15100c;
+  --brass:#c9a052;
+  --brass-dim:#7d6230;
+  --carpet:#782030;
+  --carpet-hi:#a13a4a;
+  --text:#ebdcbc;
+  --muted:#b5a07e;
+  --warn:#e58a5a;
+  --good:#a9c48a;
+  --f-display:"IM Fell English SC","Iowan Old Style",Georgia,serif;
+  --f-label:"IM Fell English","Iowan Old Style",Georgia,serif;
+  --f-body:"Alegreya",Georgia,"Times New Roman",serif;
+  color-scheme:dark;
+}
+html,body{background:var(--wood-deep)}
+body{
+  color:var(--text);font-family:var(--f-body);font-size:16px;line-height:1.5;font-variation-settings:normal;
+}
+.sk-page{
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:24px 48px;
+}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+
+.cabinet{
+  max-width:1000px;margin:0 auto;border-radius:14px 14px 6px 6px;
+  background:
+    repeating-linear-gradient(91deg,rgba(255,220,180,.025) 0 2px,transparent 2px 11px),
+    repeating-linear-gradient(89deg,rgba(0,0,0,.08) 0 1px,transparent 1px 23px),
+    linear-gradient(180deg,var(--wood-hi),var(--wood) 30%,var(--wood) 80%,#2c1910);
+  box-shadow:0 30px 60px -20px #000,inset 0 1px 0 rgba(255,220,170,.15);
+  padding:clamp(16px,3vw,32px);
+  display:flex;flex-direction:column;gap:clamp(18px,3vw,28px);
+}
+
+/* Top bar (D24): name board on the left, the wind gauge beside it, then volume,
+   MIDI and All notes off on the right. Wraps to two rows, then one column. */
+.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(220px,280px);gap:16px 28px;align-items:center}
+@media (max-width:900px){
+  .topbar{grid-template-columns:minmax(0,1fr) minmax(220px,280px)}
+  .topbar .nameboard{grid-column:1 / -1}
+}
+@media (max-width:560px){.topbar{grid-template-columns:minmax(0,1fr)}}
+.top-ctrls{display:flex;flex-direction:column;gap:10px;min-width:0}
+.direct .check{color:var(--text);font-family:var(--f-label);font-size:15px}
+.direct input[type=range]:disabled{opacity:.4}
+.direct-midi{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);font-style:italic}
+.btn-small{padding:2px 10px;font-size:13px;font-style:normal}
+
+/* Name board */
+.nameboard{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-width:0}
+.plate{
+  font-family:var(--f-display);font-size:clamp(28px,4.4vw,42px);letter-spacing:.04em;line-height:1.05;
+  color:var(--brass);text-shadow:0 1px 0 #000,0 -1px 0 rgba(255,230,170,.18);
+  text-wrap:balance;margin:0;font-weight:400;
+}
+.subplate{font-family:var(--f-label);font-style:italic;color:var(--muted);font-size:15px;margin:0;text-wrap:balance}
+.fret{width:min(240px,80%);height:10px;opacity:.7}
+
+/* Recessed rails (stops, envelopes) */
+.rail{
+  background:linear-gradient(180deg,#1f120b,var(--rail));border-radius:8px;
+  box-shadow:inset 0 2px 6px #000,0 1px 0 rgba(255,220,170,.08);
+  padding:14px 12px 16px;
+}
+.rail-label{font-family:var(--f-label);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 10px 4px}
+.stops{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 14px}
+.stop{
+  width:78px;height:78px;border-radius:50%;border:0;cursor:pointer;padding:6px;
+  background:radial-gradient(circle at 40% 35%,#fbf4e0,var(--ivory) 45%,var(--ivory-shade));
+  color:#2b1a10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  box-shadow:0 0 0 3px var(--brass-dim),0 0 0 5px #120a06,inset 0 -3px 6px rgba(0,0,0,.25);
+  transform:translateY(2px) scale(.96);filter:brightness(.78) saturate(.8);
+  transition:transform .15s ease,filter .15s ease,box-shadow .15s ease;
+}
+.stop .nm{font-family:var(--f-display);font-size:13px;line-height:1.05;text-align:center}
+.stop .ft{font-family:var(--f-label);font-style:italic;font-size:12px;color:#5b3d26}
+.stop[aria-pressed="true"]{
+  transform:translateY(-3px) scale(1.03);filter:none;
+  box-shadow:0 0 0 3px var(--brass),0 0 0 5px #120a06,0 8px 14px -4px #000,inset 0 -3px 6px rgba(0,0,0,.2);
+}
+.stop.fx .nm{color:#5a1b25}
+.rail-head{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;margin:0 0 12px}
+.rail-head .rail-label{margin:0 0 0 4px}
+select{
+  font-family:var(--f-label);font-size:14px;color:var(--text);background:#2e1a10;
+  border:1px solid var(--brass-dim);border-radius:6px;padding:4px 8px;max-width:100%;
+}
+.stop-groups{display:flex;flex-wrap:wrap;justify-content:center;gap:16px 32px}
+.stop-group{display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
+.group-label{font-family:var(--f-label);font-style:italic;font-size:13px;color:var(--muted);margin:0}
+.divided .stop{width:66px;height:66px}
+.divided .stop .nm{font-size:11.5px}
+.divided .stop .ft{font-size:11px}
+/* Vox Humana fan controls, under the stop knobs */
+.vox-panel{margin-top:14px;padding-top:10px;border-top:1px solid rgba(201,160,82,.16)}
+.vox-body{display:flex;flex-direction:column;gap:10px;margin-top:12px;padding:0 4px}
+
+.vox-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 20px;align-items:start}
+.vox-grid .field{min-width:0}
+.vox-grid select{width:100%}
+.vox-grid input[type=range]:disabled{opacity:.4}
+.expr-label{font-family:var(--f-label);font-style:italic;font-size:13px;color:var(--muted);margin:4px 0 -2px}
+@media (max-width:860px){.vox-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.vox-grid{grid-template-columns:1fr}}
+
+/* Console: gauge + controls */
+.console{display:flex}
+.gauge-wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.gauge{width:180px;max-width:100%;height:auto;display:block}
+.readouts{display:grid;grid-template-columns:auto auto;gap:2px 12px;font-family:var(--f-label);font-size:14px;color:var(--muted);align-items:baseline}
+.readouts b{font-family:var(--f-body);font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;font-size:16px;text-align:right}
+/* The status line sits under the gauge with room for two lines, so a longer
+   message never moves the gauge (D25). */
+.gauge-col{display:flex;flex-direction:column;align-items:center;gap:2px;width:180px;max-width:100%}
+.status{display:block;width:100%;min-height:2.9em;line-height:1.45;text-align:center;color:var(--warn);font-style:italic;font-size:14px}
+.status.ok{color:var(--muted)}
+.ctrls{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:12px 32px;align-items:start;font-size:15px;flex:1;min-width:0}
+@media (max-width:680px){.ctrls{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px}
+.field-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.field-head label{font-family:var(--f-label);font-size:15px}
+.field-head output{font-variant-numeric:tabular-nums;color:var(--text);font-size:14px}
+.sub{color:var(--muted);font-size:13px;margin:0;font-style:italic}
+input[type=range]{width:100%;accent-color:var(--brass);margin:0}
+input[type=checkbox]{accent-color:var(--brass);width:17px;height:17px;margin:0}
+.check{display:flex;gap:10px;align-items:center;cursor:pointer;font-size:14px;color:var(--muted)}
+.sec-checks{display:flex;gap:8px 22px;flex-wrap:wrap}
+.midi-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{
+  border:1px solid var(--brass-dim);background:linear-gradient(180deg,#4a2c1c,#2e1a10);border-radius:6px;
+  padding:6px 14px;cursor:pointer;font-family:var(--f-label);font-size:15px;color:var(--text);
+  box-shadow:inset 0 1px 0 rgba(255,220,170,.12);
+}
+.btn:hover{border-color:var(--brass)}
+/* Connect MIDI glows orange until an input is listening (D25) */
+.btn.attention{border-color:var(--warn);box-shadow:0 0 0 1px var(--warn),0 0 10px rgba(229,138,90,.45),inset 0 1px 0 rgba(255,220,170,.12)}
+.btn.attention:hover{border-color:#f0a57d}
+.midi-status{font-size:13px;color:var(--muted);font-style:italic;margin:0;min-width:0}
+.midi-status.on{color:var(--good);font-style:normal}
+.midi-status.bad{color:var(--warn)}
+.hint{color:var(--muted);font-size:14px;margin:0}
+kbd{font-family:var(--f-body);font-size:13px;border:1px solid var(--brass-dim);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--text);background:rgba(0,0,0,.25)}
+
+/* Keyboard */
+.keybed{
+  background:linear-gradient(180deg,#140b07,#24140d);border-radius:6px;padding:10px 8px 14px;
+  box-shadow:inset 0 3px 8px #000;
+}
+.keys{position:relative;display:flex;height:clamp(150px,22vw,200px);touch-action:none;user-select:none;-webkit-user-select:none}
+.white{
+  flex:1 1 0;min-width:0;position:relative;
+  background:linear-gradient(180deg,#f6eed8,var(--ivory) 70%,#e2d4b0);
+  border:1px solid #6b5536;border-top:0;border-radius:0 0 5px 5px;margin:0 1px 0 0;
+  box-shadow:inset 0 -6px 0 #d5c49c,0 2px 2px rgba(0,0,0,.4);
+  display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;
+}
+.black{
+  position:absolute;top:0;height:60%;z-index:2;border-radius:0 0 4px 4px;
+  background:linear-gradient(180deg,#2c221b,var(--ebony) 30%,#060403);
+  box-shadow:inset 0 -5px 0 #33271f,0 3px 4px rgba(0,0,0,.6);
+  display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;
+}
+.key .lbl{font-family:var(--f-label);font-size:11px;color:#8a7350;pointer-events:none;text-transform:uppercase}
+.black .lbl{color:#7a6650}
+.white.down{background:linear-gradient(180deg,#e6dbbd,#ddd0ab);box-shadow:inset 0 -2px 0 #c7b68c;transform:translateY(2px)}
+.black.down{box-shadow:inset 0 -1px 0 #33271f;transform:translateY(2px);background:linear-gradient(180deg,#221a14,#0a0705)}
+/* brass notch in the keybed where the treble half of divided stops begins */
+.white.split::after{content:"";position:absolute;left:-3px;top:-9px;width:3px;height:8px;background:var(--brass);border-radius:1px}
+
+/* Section headings, treadles + envelopes */
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 4px}
+.sec-head h2{font-family:var(--f-display);font-weight:400;font-size:20px;color:var(--brass);margin:0;letter-spacing:.03em}
+.feet{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.foot{display:flex;flex-direction:column;gap:14px;align-items:stretch;min-width:0}
+.treadle{
+  align-self:center;width:min(190px,100%);height:96px;border:0;cursor:pointer;border-radius:10px;padding:10px;
+  background:linear-gradient(180deg,#4a2b1b,#2b170e);
+  box-shadow:0 8px 0 #160c07,0 12px 16px -6px #000;
+  transform-origin:50% 0;touch-action:none;
+}
+.treadle .carpet{
+  display:flex;align-items:center;justify-content:center;height:100%;border-radius:5px;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(240,200,120,.35) 0 3px,transparent 4px) 0 0/18px 18px,
+    radial-gradient(circle at 50% 50%,rgba(20,0,0,.35) 0 6px,transparent 7px) 9px 9px/18px 18px,
+    linear-gradient(180deg,var(--carpet-hi),var(--carpet));
+  border:2px solid #1a0c06;font-family:var(--f-display);font-size:14px;color:#f3dcc0;text-shadow:0 1px 2px #000;
+}
+.env{display:flex;flex-direction:column;gap:10px}
+.env-top{display:flex;justify-content:space-between;align-items:baseline}
+.env-top .rail-label{margin:0}
+.env-flow{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.env svg{width:100%;height:auto;display:block}
+.env-grid{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center}
+.env-grid label{font-family:var(--f-label);font-size:14px}
+.env-grid output{font-variant-numeric:tabular-nums;font-size:13px;color:var(--text);min-width:5.2ch;text-align:right}
+
+/* Adjustments */
+.adjust-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:680px){.adjust-grid{grid-template-columns:1fr}}
+.field-label{font-family:var(--f-label);font-size:15px}
+.field select{align-self:flex-start}
+.adjust-grid .rail{display:flex;flex-direction:column;gap:14px;min-width:0}
+.adjust-grid .rail-label{margin:0 0 -4px 0}
+.voicing{margin-top:14px;padding-top:10px;border-top:1px solid rgba(201,160,82,.16)}
+
+/* Info buttons (D24): a small brass "i" beside a heading that shows or hides the
+   section's explanations. */
+.info-btn{
+  display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;padding:0;margin-left:8px;
+  border-radius:50%;border:1px solid var(--brass-dim);background:#2e1a10;cursor:pointer;vertical-align:middle;
+  font-family:Georgia,serif;font-style:italic;font-weight:700;font-size:12px;line-height:1;color:var(--muted);
+  text-transform:none;letter-spacing:0;flex:none;
+}
+.info-btn:hover{border-color:var(--brass);color:var(--text)}
+.info-btn[aria-pressed="true"]{background:var(--brass);border-color:var(--brass);color:var(--wood-deep)}
+.field-head.info-host{justify-content:flex-start}
+.field-head.info-host .info-btn{margin:0 auto 0 8px;align-self:center}
+.voicing-body{display:flex;flex-direction:column;gap:14px;margin-top:12px}
+:is(.voicing,.vox-panel) summary{
+  cursor:pointer;font-family:var(--f-label);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);padding:2px 4px;list-style:none;display:flex;align-items:center;gap:10px;
+}
+:is(.voicing,.vox-panel) summary::-webkit-details-marker{display:none}
+:is(.voicing,.vox-panel) summary::before{content:"";width:0;height:0;border:5px solid transparent;border-left:7px solid var(--brass);transition:transform .15s ease;transform-origin:3px 50%}
+:is(.voicing,.vox-panel)[open] summary::before{transform:rotate(90deg)}
+:is(.voicing,.vox-panel) summary:hover{color:var(--text)}
+.voicing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.rank-card{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:6px;background:rgba(0,0,0,.18);border:1px solid rgba(201,160,82,.18);min-width:0}
+.rank-name{margin:0;font-family:var(--f-display);font-size:16px;color:var(--brass)}
+.rank-name span{font-family:var(--f-label);font-style:italic;font-size:13px;color:var(--muted)}
+.rank-card .field-head label{font-size:14px}
+.rank-card .field-head output{font-size:13px}
+
+/* Notes */
+.notes{max-width:1000px;margin:28px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px 28px}
+.notes h2{grid-column:1 / -1;font-family:var(--f-display);font-weight:400;color:var(--brass);font-size:22px;margin:0;letter-spacing:.03em}
+.notes div{min-width:0}
+.notes h3{font-family:var(--f-label);font-style:italic;font-weight:400;font-size:17px;margin:0 0 2px;color:var(--text)}
+.notes p{margin:0;color:var(--muted);font-size:15px;max-width:60ch}
+
+@media (max-width:640px){
+  .feet{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .stop{width:66px;height:66px}
+  .stop .nm{font-size:11.5px}
+  .stop .ft{font-size:11px}
+  .treadle{height:84px}
+}
+@media (prefers-reduced-motion:reduce){
+  .stop,.white,.black,:is(.voicing,.vox-panel) summary::before{transition:none}
+}
+
+/* Modulation sequencer (D30): a piano roll of sweep shapes */
+.seq-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px}
+.seq-head .field{min-width:120px}
+.seq-head .seq-amount{flex:1 1 200px}
+.seq-head .check{color:var(--text);font-family:var(--f-label);font-size:15px;align-self:center}
+.seq-roll{overflow-x:auto;padding-bottom:4px}
+.seq-grid{--label:104px;display:grid;grid-template-columns:var(--label) repeat(var(--steps),minmax(18px,1fr));grid-template-rows:18px repeat(10,26px);position:relative;min-width:0;user-select:none;-webkit-user-select:none}
+.seq-beat{grid-row:1;font-size:11px;color:var(--muted);padding-left:3px;border-left:1px solid rgba(201,160,82,.18)}
+.seq-beat.is-bar{border-left-color:rgba(201,160,82,.5);color:var(--text)}
+.seq-group{grid-column:1 / -1;font-family:var(--f-label);font-style:italic;font-size:13px;color:var(--muted);align-self:end;padding-bottom:2px}
+.seq-label{grid-column:1;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);padding-right:6px;white-space:nowrap}
+.seq-icon{width:18px;height:14px;flex:none;fill:none;stroke:var(--brass);stroke-width:1.6}
+.seq-cell{appearance:none;margin:0;padding:0;border:0;border-left:1px solid rgba(201,160,82,.08);border-bottom:1px solid rgba(201,160,82,.08);background:rgba(0,0,0,.18);cursor:pointer}
+.seq-cell.is-beat{border-left-color:rgba(201,160,82,.22)}
+.seq-cell.is-bar{border-left-color:rgba(201,160,82,.55)}
+.seq-cell:hover{background:rgba(201,160,82,.14)}
+.seq-note{appearance:none;position:relative;margin:2px 1px;padding:0;border:1px solid #1a0c06;border-radius:4px;cursor:pointer;z-index:1;min-width:0;overflow:visible;
+  background:linear-gradient(180deg,var(--carpet-hi),var(--carpet))}
+.seq-note.down{background:linear-gradient(180deg,#5a4a2a,#3e3018)}
+.seq-note.selected{box-shadow:0 0 0 2px var(--brass),0 0 10px rgba(201,160,82,.45)}
+.seq-shape{position:absolute;inset:3px 6px;width:calc(100% - 12px);height:calc(100% - 6px);fill:none;stroke:#f3dcc0;stroke-width:1.6;pointer-events:none}
+.seq-handle{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize;touch-action:none}
+.seq-handle.start{left:-3px}
+.seq-handle.end{right:-3px}
+.seq-note.selected .seq-handle{background:linear-gradient(90deg,transparent 3px,rgba(201,160,82,.9) 3px,rgba(201,160,82,.9) 5px,transparent 5px)}
+.seq-lane{position:relative;pointer-events:none;z-index:2}
+.seq-play{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--brass);box-shadow:0 0 8px rgba(201,160,82,.7)}
+@media (max-width:560px){.seq-grid{--label:28px}.seq-label span{display:none}}
+@media (prefers-reduced-motion:reduce){.seq-play{box-shadow:none}}
+/* The sequencer in the Treadles section (D32): its lanes as tabs with a lamp */
+.seq{margin:0 0 18px;display:flex;flex-direction:column;gap:12px}
+.seq .rail-label{margin-bottom:0}
+.seq-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.seq-tab{appearance:none;display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;border:1px solid rgba(201,160,82,.35);background:rgba(0,0,0,.22);color:var(--muted);font:inherit;font-size:14px;cursor:pointer}
+.seq-tab[aria-selected="true"]{background:linear-gradient(180deg,#4a2c1c,#2e1a10);color:var(--text);border-color:var(--brass)}
+.seq-tab .lamp{width:8px;height:8px;border-radius:50%;background:#3a2a1c;box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
+.seq-tab.on .lamp{background:#f0c060;box-shadow:0 0 6px rgba(240,192,96,.8)}
+.seq-head .field:first-child{flex:1 1 200px}
+/* Patches (D33): a row across the top bar */
+.patchbar{grid-column:1 / -1;display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid rgba(201,160,82,.16)}
+.patch-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.patch-label{font-family:var(--f-label);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.patch-row select{min-width:170px;max-width:100%}
+.patch-edited{font-family:var(--f-label);font-style:italic;font-size:14px;color:var(--warn)}
+.patch-btns{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.patch-ask{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.patch-ask label{font-family:var(--f-label);font-size:15px;color:var(--text)}
+.patch-ask input{flex:0 1 240px;min-width:0;font:inherit;font-size:15px;padding:4px 8px;border-radius:5px;border:1px solid var(--brass-dim);background:#120a06;color:var(--text)}
+.patch-msg{margin:0;min-height:1.2em;font-size:13px;font-style:italic;color:var(--muted)}
+.btn:disabled{opacity:.45;cursor:default}
+
+/* The name board: Parlour on its own line, what it is underneath in much smaller type. */
+.plate-name{display:block}
+.plate-tag{display:block;margin-top:4px;font-family:var(--f-label);font-style:italic;font-size:.4em;letter-spacing:.02em;color:var(--muted);text-shadow:none}
+/* The kit's preset bar and MIDI button, in the cabinet's patch row and top bar */
+.patch-kit{flex:1 1 320px;min-width:0}
+.patch-kit select,.patch-kit input{font-family:var(--f-label);font-size:14px}
+.midi-kit{display:inline-flex;align-items:center;gap:8px;min-width:0}
+.patch-kit .presets{min-width:0;max-width:100%}
+.patch-kit .preset-field{flex:1 1 auto;min-width:0}
+.patch-kit .preset-field select{min-width:0;width:100%}
+@media (max-width:560px){.patch-kit{flex-basis:100%}}

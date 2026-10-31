@@ -1,0 +1,199 @@
+{
+ "patch": "init",
+ "params": {
+  "wind.helper": 0,
+  "treadle.noise": 0
+ },
+ "custom": {
+  "seq": {
+   "lanes": {
+    "left": {
+     "on": false
+    },
+    "right": {
+     "on": false
+    }
+   }
+  }
+ },
+ "events": [
+  {
+   "t": 0.5,
+   "on": 55,
+   "vel": 100
+  },
+  {
+   "t": 0.5,
+   "on": 60,
+   "vel": 100
+  },
+  {
+   "t": 0.5,
+   "on": 64,
+   "vel": 100
+  },
+  {
+   "t": 4.5,
+   "off": 55
+  },
+  {
+   "t": 4.5,
+   "off": 60
+  },
+  {
+   "t": 4.5,
+   "off": 64
+  },
+  {
+   "t": 0.0,
+   "msg": "treadle.left",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 0.25,
+   "msg": "treadle.left",
+   "values": [
+    0
+   ]
+  },
+  {
+   "t": 0.4,
+   "msg": "treadle.right",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 0.65,
+   "msg": "treadle.right",
+   "values": [
+    0
+   ]
+  },
+  {
+   "t": 0.8,
+   "msg": "treadle.left",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 1.05,
+   "msg": "treadle.left",
+   "values": [
+    0
+   ]
+  },
+  {
+   "t": 1.2,
+   "msg": "treadle.right",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 1.45,
+   "msg": "treadle.right",
+   "values": [
+    0
+   ]
+  },
+  {
+   "t": 1.6,
+   "msg": "treadle.left",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 1.85,
+   "msg": "treadle.left",
+   "values": [
+    0
+   ]
+  },
+  {
+   "t": 2.0,
+   "msg": "treadle.right",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 2.25,
+   "msg": "treadle.right",
+   "values": [
+    0
+   ]
+  },
+  {
+   "t": 2.4,
+   "msg": "treadle.left",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 2.65,
+   "msg": "treadle.left",
+   "values": [
+    0
+   ]
+  },
+  {
+   "t": 2.8,
+   "msg": "treadle.right",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 3.05,
+   "msg": "treadle.right",
+   "values": [
+    0
+   ]
+  },
+  {
+   "t": 3.2,
+   "msg": "treadle.left",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 3.45,
+   "msg": "treadle.left",
+   "values": [
+    0
+   ]
+  },
+  {
+   "t": 3.6,
+   "msg": "treadle.right",
+   "values": [
+    1
+   ]
+  },
+  {
+   "t": 3.85,
+   "msg": "treadle.right",
+   "values": [
+    0
+   ]
+  }
+ ],
+ "length": 7.0,
+ "expect": {
+  "soundBy": 0.7,
+  "levelAt": [
+   {
+    "t": 3.5,
+    "above": -35
+   }
+  ],
+  "silentAfter": 6.8
+ }
+}
