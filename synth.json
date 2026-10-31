@@ -7,10 +7,9 @@
   "vendorCode": "Tend",
   "patchVersion": 1,
   "features": {
-    "voices": 16,
-    "voiceModes": ["poly", "mono", "legato"],
-    "standardEnvelopes": 1,
-    "standardLfos": 1,
-    "modSlots": 4
+    "voices": 64,
+    "voiceModes": ["poly"],
+    "standardEnvelopes": 0,
+    "ampEnv": false
   }
 }
