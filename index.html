@@ -2518,10 +2518,11 @@ function setupSeq() {
     sk.onMeters((m) => { if (m && m.bpm) out.textContent = `follows your DAW \u00b7 ${Math.round(m.bpm)} bpm`; });
   } else {
     bindSlider("tempoAmt", "seq.tempo", { fmt: (v) => v + " bpm" });
-    const own = () => sk.send("clock.own", 1);
-    own();
+    // Told once the sound is running (the first meter frame). A message sent
+    // before that would start the audio without a click, which browsers
+    // leave suspended, so the organ never sounded.
     let told = false;
-    sk.onMeters(() => { if (!told) { told = true; own(); } });
+    sk.onMeters(() => { if (!told) { told = true; sk.send("clock.own", 1); } });
   }
 }
 // The tabs' lamps follow whether each lane is on (a patch, or turning Direct
