@@ -42,7 +42,8 @@ The page changes the sound only through the kit's bridge:
   the rank waves, P7).
 - **Messages to the engine**: `treadle.left`, `treadle.right` (`[1]` down,
   `[0]` up), `clock.own` (`[1]`: the sequencer keeps its own tempo; the
-  browser page sends it, P3), `notes.off`.
+  browser page sends it once the sound is running, P3. A message sent before
+  then would start the audio without a click, which browsers leave suspended), `notes.off`.
 - **Messages from the engine**: `key` `[note, 1|0]` (light the key, coupled
   octaves included), `pedal.stage` `[foot, stage, relFrom]` (0 idle,
   1 attack, 2 decay, 3 sustain, 4 release), `wind.status` `[code]` (the line
