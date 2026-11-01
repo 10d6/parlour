@@ -124,6 +124,33 @@ const check = (ok, what) => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${what}`);
 
   check(errors.length === 0, "no errors" + (errors.length ? ": " + errors.join(" | ") : ""));
 
+  // A real browser's autoplay rule: a context made without a click starts
+  // suspended, and resume() only works during a click or key press (a waiting
+  // resume() finishes once a later one does). Headless Chromium doesn't
+  // enforce this, so it's emulated: the first click on a key must make sound.
+  const strict = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  await strict.addInitScript(() => {
+    const Orig = window.AudioContext, realResume = Orig.prototype.resume;
+    window.__ctxs = [];
+    window.AudioContext = class extends Orig {
+      constructor(...a) { super(...a); window.__ctxs.push(this); this.__waiting = []; if (!navigator.userActivation.isActive) this.suspend(); }
+      resume() {
+        if (!navigator.userActivation.isActive) return new Promise((r) => this.__waiting.push(r));
+        return realResume.call(this).then(() => { this.__waiting.splice(0).forEach((r) => r()); });
+      }
+    };
+  });
+  await strict.goto("file://" + path.resolve(htmlPath));
+  await strict.waitForTimeout(1200);
+  const states = () => strict.evaluate(() => window.__ctxs.map((c) => c.state));
+  check(!(await states()).includes("running"), "with a browser's autoplay rule, nothing starts before a click");
+  await strict.locator('#keys [data-midi="60"]').dispatchEvent("pointerdown", { pointerId: 1, button: 0, pointerType: "mouse", isPrimary: true });
+  await strict.mouse.click(600, 600);
+  await strict.keyboard.down("q");
+  await strict.waitForTimeout(900);
+  check((await states()).includes("running") && !/Press a key/.test(await strict.textContent("#status")), `with a browser's autoplay rule, playing starts the organ (${(await states()).join(",")}; "${await strict.textContent("#status")}")`);
+  await strict.keyboard.up("q");
+
   // The same page as a plugin window, with a stand-in for the plugin's web
   // view bridge (as synthkit's web/test/plugin-ui-test.cjs does).
   const plug = await browser.newPage({ viewport: { width: 1200, height: 900 } });
