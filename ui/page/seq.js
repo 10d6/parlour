@@ -3,10 +3,10 @@
 // patches and played by the engine; the page draws the piano roll, edits it
 // and shows the playhead.
 //
-// Tempo: in the browser the sequencer keeps its own tempo (the "seq.tempo"
-// parameter, saved in patches), and the page tells the engine so with the
-// "clock.own" message. In a DAW it follows the song's tempo instead.
-import { page, byId, bindSlider, pageStore } from "./util.js";
+// Tempo: the sequencer runs at the transport's tempo (P8). In the browser
+// that's synthkit's tempo control, placed in the sequencer's header and saved
+// with the patch (features.tempoInPatch); in a DAW, the song's tempo.
+import { page, byId, pageStore } from "./util.js";
 import { drawVox } from "./stops.js";
 import {
   SEQ_ROWS, SEQ_CURVES, SEQ_TARGETS, LANE_NAMES, METERS, MAX_BARS, normaliseSeq, reshape,
@@ -242,20 +242,10 @@ export function setupSeq() {
   };
   requestAnimationFrame(tick);
 
-  // Tempo: the sequencer's own in the browser; the DAW's in a plugin.
-  if (sk.host) {
-    byId("tempoField").hidden = true;
-    byId("tempoHostField").hidden = false;
-    const out = byId("tempoHost");
-    sk.onMeters((m) => { if (m && m.bpm) out.textContent = `follows your DAW · ${Math.round(m.bpm)} bpm`; });
-  } else {
-    bindSlider("tempoAmt", "seq.tempo", { fmt: (v) => v + " bpm" });
-    // Told once the sound is running (the first meter frame). A message sent
-    // before that would start the audio without a click, which browsers
-    // leave suspended, so the organ never sounded.
-    let told = false;
-    sk.onMeters(() => { if (!told) { told = true; sk.send("clock.own", 1); } });
-  }
+  // Tempo: synthkit's control, here in the sequencer's header (a readout of
+  // the DAW's tempo in a plugin). Space works the treadles, so it doesn't
+  // start the clock.
+  sk.mount(byId("tempoKit"), "tempo", { space: false });
 }
 // The tabs' lamps follow whether each lane is on (a patch, or turning Direct
 // wind on, can change that from elsewhere).

@@ -108,6 +108,8 @@ const check = (ok, what) => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${what}`);
     await sel.selectOption(lay[0]);
     await page.waitForTimeout(300);
     check((await page.isChecked("#directOn")) && (await pressed("Vox Humana tremolo")) === "true", "loading Lay Still turns on Direct wind and draws the Vox Humana");
+    const bpm = await page.inputValue(".seq-tempo-kit .bpm-input");
+    check(bpm === "69", `Lay Still brings its own tempo to the sequencer (${bpm} bpm)`);
   }
 
   // A reedorgan patch file becomes one of your patches
@@ -190,10 +192,8 @@ const check = (ok, what) => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${what}`);
   });
   await plug.goto("file://" + path.resolve(htmlPath));
   await plug.waitForTimeout(1200);
-  check(await plug.locator("#tempoField").isHidden() && await plug.locator("#tempoHostField").isVisible(), "in a DAW the sequencer shows the DAW's tempo, not its own slider");
+  check(await plug.locator(".seq-tempo-kit .tempo.is-host").isVisible() && !(await plug.locator(".seq-tempo-kit .bpm-input").isVisible()), "in a DAW the sequencer shows the DAW's tempo, not its own control");
   check(await plug.locator("#directLearn").isHidden(), "in a DAW the Learn buttons give way to the DAW's own MIDI mapping");
-  const bootSent = await plug.evaluate(() => window.__sent.slice());
-  check(!bootSent.some((m) => m.t === "msg" && m.i === 2), "in a DAW, the page leaves the sequencer on the DAW's tempo");
   await plug.evaluate(() => { window.__sent.length = 0; });
   await plug.getByRole("button", { name: "Celeste 8\u2032", exact: true }).click();
   await plug.keyboard.down("ArrowRight");
@@ -201,7 +201,7 @@ const check = (ok, what) => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${what}`);
   await plug.keyboard.up("ArrowRight");
   const sentAll = await plug.evaluate(() => window.__sent);
   // Parameters and messages go to the plugin by index: the synth declares
-  // treadle.left, treadle.right, clock.own, … in that order.
+  // treadle.left, treadle.right, … in that order.
   check(sentAll.filter((m) => m.t === "param").length >= 1, "in a DAW, drawing a stop reaches the plugin");
   check(sentAll.some((m) => m.t === "msg" && m.i === 1 && m.v[0] === 1) && sentAll.some((m) => m.t === "msg" && m.i === 1 && m.v[0] === 0), "in a DAW, the treadles reach the plugin");
   check(perr.length === 0, "plugin window: no errors" + (perr.length ? ": " + perr.join(" | ") : ""));

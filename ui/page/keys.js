@@ -104,22 +104,23 @@ function showCC() {
 const ccPos = (v, n) => Math.round((v / 127) * n);
 // A delay controller: all the way down is Never, all the way up is no delay.
 const delayPos = (cc) => Math.round(((1 - Math.min(127, Math.max(0, cc)) / 127) * 2500) / 50) * 50;
-// The kit's MIDI tap (API.md §9a): returning true means the page has taken
-// the message and the engine won't see it; false passes it on. The page takes
-// only the controllers it turns into slider moves; notes, the sustain pedal
-// and the pitch wheel go on to the engine.
-function onMidiIn(bytes) {
-  const [st, d1, d2] = bytes, cmd = st & 0xf0;
-  if (cmd !== 0xb0) return false;
-  if (learning && d1 < 120) { setLearned(learning, d1); return true; }
+// Controllers the engine doesn't know about: the page takes them with
+// synthkit's sk.takeMidi (returning true takes the message from the engine).
+// The fixed ones (mod wheel → Scoop, expression and foot pedals → Knee swell,
+// breath → Direct wind, the volume knob → Direct wind or Volume) are declared
+// in the engine (P8), so they work in a DAW too; the page's sliders follow.
+// Here: MIDI Learn, a learned Direct wind control other than the volume knob,
+// and a learned Vibrato delay control.
+function takeLearned(bytes) {
+  const [st, d1, d2] = bytes;
+  if ((st & 0xf0) !== 0xb0 || d1 >= 120) return false;
+  if (learning) { setLearned(learning, d1); return true; }
   const direct = page.sk.get("wind.direct") >= 0.5;
-  if (direct && d1 === learned.direct) { ctl.directAir.set(ccPos(d2, 36)); return true; }
+  if (learned.direct !== 7) {
+    if (direct && d1 === learned.direct) { ctl.directAir.set(ccPos(d2, 36)); return true; }
+    if (d1 === 7) { ctl.volume.set(ccPos(d2, 100)); return true; }   // the volume knob stays Volume
+  }
   if (learned.vib != null && d1 === learned.vib) { ctl.vibDelay.set(delayPos(d2)); return true; }
-  if (d1 === 1) { ctl.scoopDepth.set(ccPos(d2, 40) * 5); return true; }    // the mod wheel sets Scoop (D28)
-  if (d1 === 11 || d1 === 4) { ctl.swell.set(ccPos(d2, 100)); return true; }
-  if (d1 === 2) { ctl.directAir.set(ccPos(d2, 36)); return true; }          // a breath controller (D26)
-  if (d1 === 7) { ctl.volume.set(ccPos(d2, 100)); return true; }            // with Direct wind off, Volume
-  if (d1 === 120 || d1 === 123) { for (const m of [...litKeys]) markKey(m, false); }
   return false;
 }
 
@@ -215,6 +216,6 @@ export function setupKeys() {
       byId(L.out).textContent = "Map controllers in your DAW";
     }
   } else {
-    sk.onMidi(onMidiIn);
+    sk.takeMidi(takeLearned);
   }
 }

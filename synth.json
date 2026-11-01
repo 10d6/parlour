@@ -5,11 +5,14 @@
   "version": "0.1.0",
   "pluginCode": "Prlr",
   "vendorCode": "Tend",
-  "patchVersion": 1,
+  "patchVersion": 2,
   "features": {
     "voices": 64,
-    "voiceModes": ["poly"],
+    "voiceModes": [
+      "poly"
+    ],
     "standardEnvelopes": 0,
-    "ampEnv": false
+    "ampEnv": false,
+    "tempoInPatch": true
   }
 }

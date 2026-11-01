@@ -1,10 +1,17 @@
 {
   "synthkit": 1,
   "synth": "parlour",
-  "patchVersion": 1,
+  "patchVersion": 2,
   "name": "Lay Still",
   "author": "Parlour",
   "tags": [],
+  "tempo": {
+    "bpm": 69,
+    "timeSig": [
+      4,
+      4
+    ]
+  },
   "params": {
     "wind.air": 1,
     "wind.direct": 1,
@@ -49,7 +56,6 @@
     "scoop.mode": 0,
     "scoop.curve": 0,
     "vib.mode": 0,
-    "seq.tempo": 69,
     "wind.helper": 2,
     "stops.split": 1,
     "compass": 0,

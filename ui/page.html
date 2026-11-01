@@ -236,12 +236,9 @@
     <div class="rail seq" id="seq" data-info="seq">
       <p class="rail-label info-host">Modulation sequencer</p>
       <div class="seq-head">
-        <div class="field" id="tempoField">
-          <div class="field-head"><label for="tempoAmt">Tempo</label><output id="tempoOut" for="tempoAmt">100 bpm</output></div>
-          <input type="range" id="tempoAmt" min="30" max="200" step="1" value="100">
-        </div>
-        <div class="field" id="tempoHostField" hidden>
-          <div class="field-head"><span class="field-label">Tempo</span><output id="tempoHost">follows your DAW</output></div>
+        <div class="field seq-tempo" id="tempoField">
+          <span class="field-label">Tempo</span>
+          <div class="seq-tempo-kit" id="tempoKit"></div>
         </div>
         <div class="field">
           <label for="seqMeter" class="field-label">Time</label>
@@ -267,7 +264,7 @@
       </div>
       <div class="seq-roll"><div class="seq-grid" id="seqGrid" role="group" aria-label="Left treadle pattern"></div></div>
       <p class="sub">One pattern for each thing it moves, all playing together: the left and right treadles, Direct wind (0&Prime; to 3.6&Prime;), the Vox Humana fan's speed (1 to 12 Hz) and the knee swell (closed to open). Pick a pattern above to see and edit it; a lit lamp means it's playing. The treadle patterns pump the organ: they start with the first touch and keep going between phrases, a sweep up pressing the pedal and a sweep down letting it up. The others start on the first note of a phrase (or on each note) and loop while you hold keys.</p>
-      <p class="sub">A piano roll of sweeps in 16th notes. Each row is a shape, rising or falling; tap a square to put that shape there, and drag either end of a note to stretch it backwards or forwards. Tap a note to select it: Backspace removes it, Shift with the arrow keys stretches it, Alt with the arrow keys shortens it. One shape plays at a time in a pattern, so a new note replaces any note it lands on. Each note moves its control by that pattern's Amount, starting from wherever the last note left it, and it holds still between notes; a sweep that reaches either end of the range stops there. Every pass starts from the control's own setting, which the sequencer never moves. Tempo counts quarter notes, or eighth notes in 6/8. In a DAW the sequencer follows the song's tempo instead, counting quarter notes in every time signature.</p>
+      <p class="sub">A piano roll of sweeps in 16th notes. Each row is a shape, rising or falling; tap a square to put that shape there, and drag either end of a note to stretch it backwards or forwards. Tap a note to select it: Backspace removes it, Shift with the arrow keys stretches it, Alt with the arrow keys shortens it. One shape plays at a time in a pattern, so a new note replaces any note it lands on. Each note moves its control by that pattern's Amount, starting from wherever the last note left it, and it holds still between notes; a sweep that reaches either end of the range stops there. Every pass starts from the control's own setting, which the sequencer never moves. Tempo counts quarter notes in every time signature, and is saved with the patch. It can follow a MIDI clock too (choose MIDI clock beside it). In a DAW the sequencer follows the song's tempo instead.</p>
       <p class="sub">Turning a pattern on turns on what it moves: Direct wind, or the Vox Humana stop. Direct wind and the treadles can't both supply the air: the treadle patterns rest while Direct wind is on, and turning one on turns Direct wind off. Your own feet still work alongside, and the helper pump adds a trickle on top.</p>
     </div>
     <div class="feet" id="feet"></div>

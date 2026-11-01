@@ -61,7 +61,6 @@ const LEGACY_PARAMS = {
   scoopMode: ["scoop.mode", "choice"],
   scoopCurve: ["scoop.curve", "choice"],
   vibMode: ["vib.mode", "choice"],
-  autoTempo: ["seq.tempo"],
   helper: ["wind.helper"],
   split: ["stops.split", "choice"],
   compass: ["compass", "choice"],
@@ -71,11 +70,13 @@ const LEGACY_PARAMS = {
 
 export const LEGACY_APP = "parlor-reed-organ";
 
-// {params, custom} from a reedorgan patch's settings. Anything missing is left
-// out, so it takes Parlour's default, as reedorgan gave it its factory value.
+// {params, custom, tempo} from a reedorgan patch's settings. Anything missing
+// is left out, so it takes Parlour's default, as reedorgan gave it its factory
+// value. The sequencer's tempo becomes the patch's tempo (P8).
 export function legacySettingsToPatch(settings) {
   const params = {}, custom = {};
   const s = settings || {};
+  const tempo = { bpm: typeof s.autoTempo === "number" ? s.autoTempo : 100, timeSig: [4, 4] };
   for (const [key, [id, conv]] of Object.entries(LEGACY_PARAMS)) {
     if (!(key in s)) continue;
     const v = s[key];
@@ -102,7 +103,7 @@ export function legacySettingsToPatch(settings) {
     for (const [k, name] of Object.entries(stages)) if (typeof e[k] === "number") params[`pedal.${foot}.${name}`] = e[k];
   }
   if (s.seq && typeof s.seq === "object") custom.seq = s.seq;
-  return { params, custom };
+  return { params, custom, tempo };
 }
 
 // Reads a .reedorgan.json file: {name, params, custom}, or {error}.
