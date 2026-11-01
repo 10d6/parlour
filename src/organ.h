@@ -355,9 +355,8 @@ inline double seqValue(const std::vector<SeqNote>& notes, double pos, double bas
   }
   return v;
 }
-// Seconds per 16th: the tempo counts the meter's beat unit (quarters, or
-// eighths in 6/8). Following a host, the tempo always counts quarter notes.
-inline double stepSeconds(double tempo, int meter) { return 60 / tempo / stepsPerBeat(meter); }
-inline double hostStepSeconds(double bpm) { return 60 / bpm / 4; }
+// Seconds per 16th at a tempo in quarter notes (the transport's, in every
+// time signature; reedorgan counted eighths in 6/8, P8).
+inline double stepSeconds(double bpm) { return 60 / bpm / 4; }
 
 }  // namespace organ

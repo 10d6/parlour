@@ -174,19 +174,6 @@ void buildVoicing(Voicing& v, double sr) {
   v.sr = sr;
 }
 
-// A MIDI controller that moves a setting (in the plugin, where the page can't
-// set parameters from MIDI): its value wins until the parameter itself moves.
-struct Override {
-  bool active = false;
-  float value = 0, seen = 0;
-  void set(float v, float paramNow) { active = true; value = v; seen = paramNow; }
-  float apply(float paramNow) {
-    if (active && paramNow == seen) return value;
-    active = false;
-    return paramNow;
-  }
-};
-
 }  // namespace
 
 /* ======================================================================== */
@@ -242,21 +229,23 @@ struct Parlour : Synth {
   Param voxRate, voxShape, voxBlade, voxShadow, voxShimmer, voxStereo, voxWhole, voxLid;
   Param scoopDepthP, scoopTime, scoopMode, scoopCurveP, scoopCross;
   Param vibDepthP, vibRateP, vibDelay, vibFadeP, vibModeP, vibNatural, vibColourP;
-  Param seqTempo, pedalLink;
+  Param pedalLink;
   std::array<std::array<Param, 4>, 2> pedal;   // [left, right][a, d, s, r]
   Param bendRange;
 
   Custom<Seq> seq;
   Custom<Voicing> voicing;
   ModSource srcPressure, srcReeds, srcDrain, srcPedalL, srcPedalR, srcFlowL, srcFlowR, srcSeqFree, srcSeqKeys, srcFan;
-  MessageId msgTreadleL, msgTreadleR, msgClock, msgPanic, msgKey, msgStage, msgStatus;
+  MessageId msgTreadleL, msgTreadleR, msgPanic, msgKey, msgStage, msgStatus;
 
   void defineParams(ParamBuilder& b) override {
     using organ::RANKS;
     volume = b.add("volume").name("Volume").range(0, 150).def(100).unit("%").group("Output");
     direct = b.add("wind.direct").name("Direct Wind").toggle().def(0).group("Wind");
-    directAir = b.add("wind.air").name("Direct Wind Air").range(0, 3.6).def(2).step(0.1).unit("in").group("Wind");
-    swell = b.add("swell").name("Knee Swell").range(0, 100).def(0).unit("%").group("Wind");
+    directAir = b.add("wind.air").name("Direct Wind Air").range(0, 3.6).def(2).step(0.1).unit("in").group("Wind")
+                    .cc(2);   // a breath controller (D26)
+    swell = b.add("swell").name("Knee Swell").range(0, 100).def(0).step(1).unit("%").group("Wind")
+                .cc(11).cc(4);   // an expression or foot pedal
     reservoir = b.add("wind.reservoir").name("Reservoir Size").range(0.4, 3).log().def(0.4 * std::pow(7.5, 0.45)).unit("x").group("Wind");
     sens = b.add("wind.drift").name("Pitch Drift").range(0, 25).def(10).step(1).unit("ct").group("Wind");
     driftVar = b.add("wind.driftVar").name("Drift Variation").range(0, 100).def(40).unit("%").group("Wind");
@@ -305,7 +294,8 @@ struct Parlour : Synth {
     voxStereo = b.add("vox.stereo").name("Stereo Sweep").range(0, 100).def(0).step(1).unit("%").group("Vox Humana");
     voxWhole = b.add("vox.whole").name("Whole-sound Wobble").range(0, 60).def(0).step(1).unit("%").group("Vox Humana");
     voxLid = b.add("vox.lid").name("Lid Wobble").range(0, 100).def(0).step(1).unit("%").group("Vox Humana");
-    scoopDepthP = b.add("scoop.depth").name("Scoop").range(0, 200).def(0).step(5).unit("ct").group("Expression");
+    scoopDepthP = b.add("scoop.depth").name("Scoop").range(0, 200).def(0).step(5).unit("ct").group("Expression")
+                      .cc(1);   // the mod wheel (D28)
     scoopTime = b.add("scoop.time").name("Scoop Time").range(0.04, 0.3).def(0.12).step(0.01).unit("s").group("Expression");
     scoopMode = b.add("scoop.mode").name("Scoop On").choices({"Top voice", "Top voice, leaps up", "Every note", "Every note, by velocity", "Accents"}).group("Expression");
     scoopCurveP = b.add("scoop.curve").name("Scoop Curve").choices({"Ease in", "S-curve", "Late snap"}).group("Expression");
@@ -317,9 +307,6 @@ struct Parlour : Synth {
     vibModeP = b.add("vib.mode").name("Vibrato On").choices({"Top voice", "Every note"}).group("Expression");
     vibNatural = b.add("vib.natural").name("Natural Variation").range(0, 100).def(50).step(5).unit("%").group("Expression");
     vibColourP = b.add("vib.colour").name("Voice Colour").range(0, 100).def(30).step(5).unit("%").group("Expression");
-    // The sequencer's own tempo, for the browser. In a DAW the sequencer
-    // follows the host's tempo instead, so the host doesn't list this.
-    seqTempo = b.add("seq.tempo").name("Sequencer Tempo").range(30, 200).def(100).step(1).unit("bpm").hidden().group("Sequencer");
     pedalLink = b.add("pedal.link").name("Same Envelope For Both Feet").toggle().def(1).hidden().group("Treadles");
     const char* feet[2] = {"left", "right"};
     const char* footNames[2] = {"Left", "Right"};
@@ -363,13 +350,27 @@ struct Parlour : Synth {
   void defineMessages(MessageBuilder& b) override {
     msgTreadleL = b.add("treadle.left");   // page → engine: [1] pressed, [0] let up
     msgTreadleR = b.add("treadle.right");
-    msgClock = b.add("clock.own");         // page → engine: [1] the sequencer keeps its own tempo (the browser)
     msgPanic = b.add("notes.off");         // page → engine: All notes off
     msgKey = b.add("key");                 // engine → page: [note, 1|0] a key (or coupled key) went down or up
     msgStage = b.add("pedal.stage");       // engine → page: [foot, stage, relFrom]
     msgStatus = b.add("wind.status");      // engine → page: [code], the line under the gauge
   }
   std::unique_ptr<Voice> makeVoice() override { return std::make_unique<ParlourVoice>(*this); }
+
+  // Patch version 2 (P8): the sequencer's tempo moved from the seq.tempo
+  // parameter to the patch's own tempo (features.tempoInPatch).
+  void migratePatch(int fromVersion, PatchData& p) override {
+    if (fromVersion < 2 && p.hasParam("seq.tempo")) {
+      Json& j = p.json();
+      if (!j["tempo"].isObject()) {
+        Json t = Json::object();
+        t["bpm"] = p.param("seq.tempo");
+        t["timeSig"] = std::array<int, 2>{4, 4};
+        j["tempo"] = t;
+      }
+      p.removeParam("seq.tempo");
+    }
+  }
 
   /* ---- shared with the voices ---- */
   double sr = 48000, now = 0;                 // seconds since the engine started
@@ -450,13 +451,12 @@ struct Parlour : Synth {
   /* ---- the wind, treadles and sequencer ---- */
   std::array<organ::Foot, 2> feet{};
   int lastSide = -1;
-  bool started = false, ownClock = false;
+  bool started = false;
   double t0 = -1, free0 = -1, lastStep = 0;   // sequencer pass starts (seconds), and the step length they were set with
   double statusT = 0;
   int status = -1;
   std::array<int, 2> sentStage{-1, -1};
   std::array<double, 2> sentRel{-1, -1};
-  Override ovSwell, ovAir, ovVolume, ovScoop;
 
   /* ---- keys: couplers, sustain, expression ---- */
   struct Press { int count = 0; std::array<int, 3> notes{}; };
@@ -644,7 +644,7 @@ void Parlour::press(EventContext& ctx, int m, int velocity, int sample) {
   }
   const int mode = ctx.choice(scoopMode);
   NoteState ex;
-  ex.cents = static_cast<float>(organ::scoopDepth(mode, ovScoop.apply(ctx.get(scoopDepthP)), m, top, prev, velocity, static_cast<int>(ctx.get(scoopCross))));
+  ex.cents = static_cast<float>(organ::scoopDepth(mode, ctx.get(scoopDepthP), m, top, prev, velocity, static_cast<int>(ctx.get(scoopCross))));
   if (top) { topBefore = prev; topKey = m; topAt = tnow; hasTopSet = false; }
   ex.dur = static_cast<float>(organ::scoopDuration(ctx.get(scoopTime), organ::speechTime(organ::noteFreq(m), pressure, ctx.get(speech))));
   ex.curve = ctx.choice(scoopCurveP);
@@ -736,8 +736,6 @@ void Parlour::processEvents(EventContext& ctx) {
       const int side = msg.is(msgTreadleL) ? 0 : 1;
       if (msg.value() > 0.5f) gateOn(side, ctx.get(thumpMix) / 100);
       else gateOff(side);
-    } else if (msg.is(msgClock)) {
-      ownClock = msg.value() > 0.5f;
     } else if (msg.is(msgPanic)) {
       allNotesOff(ctx);
     }
@@ -778,13 +776,13 @@ void Parlour::processEvents(EventContext& ctx) {
         continue;
       }
       if (e.cc == 120 || e.cc == 123) { allNotesOff(ctx); ctx.out(e); continue; }
-      // Controllers that move settings (D26–D28). On the browser page these
-      // move the sliders themselves; in a DAW they arrive here.
-      if (e.cc == 7 && ctx.on(direct)) ovAir.set(std::round(v127 / 127.f * 36) / 10, ctx.get(directAir));
-      else if (e.cc == 7) ovVolume.set(std::round(v127 / 127.f * 100), ctx.get(volume));
-      else if (e.cc == 2) ovAir.set(std::round(v127 / 127.f * 36) / 10, ctx.get(directAir));
-      else if (e.cc == 11 || e.cc == 4) ovSwell.set(std::round(v127 / 127.f * 100), ctx.get(swell));
-      else if (e.cc == 1) ovScoop.set(std::round(v127 / 127.f * 40) * 5, ctx.get(scoopDepthP));
+      // The volume knob (D27) moves Direct wind while it's on, Volume
+      // otherwise (100% at the top). The other controllers are declared on
+      // their parameters (cc(), P8).
+      if (e.cc == 7) {
+        if (ctx.on(direct)) ctx.setParam(directAir, std::round(v127 / 127.f * 36) / 10);
+        else ctx.setParam(volume, std::round(v127 / 127.f * 100));
+      }
       ctx.out(e);
     } else {
       ctx.out(e);
@@ -853,13 +851,15 @@ void Parlour::processGlobal(GlobalContext& ctx, Buffer& io) {
     }
 
   const bool directOn = ctx.on(direct), voxOn = ctx.on(stopVox);
-  const double directAirIn = ovAir.apply(ctx.get(directAir));
-  const double swellSet = ovSwell.apply(ctx.get(swell)) / 100;
+  const double directAirIn = ctx.get(directAir);
+  const double swellSet = ctx.get(swell) / 100;
   const double voxSpeed = ctx.get(voxRate);
 
   // The modulation sequencer (seqTick). The treadle lanes run from the first
-  // touch; the others from the keys.
-  const double stepSec = ownClock ? organ::stepSeconds(ctx.get(seqTempo), sq.meter) : organ::hostStepSeconds(ctx.transport().bpm);
+  // touch; the others from the keys. Its tempo is the transport's: the DAW's
+  // in a plugin, and in the browser the tempo control, saved in the patch
+  // (P3, P8). It counts quarter notes in every time signature.
+  const double stepSec = organ::stepSeconds(ctx.transport().bpm);
   if (lastStep > 0 && stepSec != lastStep) {   // a tempo change keeps both clocks' place
     if (t0 >= 0) t0 = now - (now - t0) / lastStep * stepSec;
     if (free0 >= 0) free0 = now - (now - free0) / lastStep * stepSec;
@@ -967,7 +967,7 @@ void Parlour::processGlobal(GlobalContext& ctx, Buffer& io) {
   approach(cabWet, c * 1.1, dt, 0.05);
   approach(cabDry, 1 - c * 0.45, dt, 0.05);
   approach(roomWet, r * 0.7, dt, 0.05);
-  approach(masterGain, MASTER * organ::volumeGain(ovVolume.apply(ctx.get(volume))), dt, 0.03);
+  approach(masterGain, MASTER * organ::volumeGain(ctx.get(volume)), dt, 0.03);
   approach(bassCutHz, ctx.get(bassCut) <= 5.01f ? 5.0 : ctx.get(bassCut), dt, 0.03);
 
   // The graph, sample by sample. The voices left their mono sum in io.left.

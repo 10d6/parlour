@@ -453,7 +453,7 @@ every one of them. File and function names in them are reedorgan's; see
 **Why:** a translation can be checked against the original by measurement (P1), rather than re-voiced by ear.
 **Differences:** pitch modulation (detune, scoop, vibrato) is computed per control block and interpolated across it rather than per sample; the reed shelf's gain updates per block. Neither is audible. Reeds on a stop that's off aren't computed (their envelopes and start times still run), which keeps big chords affordable.
 
-## P3. The sequencer follows the DAW's tempo; the browser keeps its own
+## P3. The sequencer follows the DAW's tempo; the browser keeps its own (now through synthkit, P8)
 
 **Chosen:** in a DAW the modulation sequencer runs at the song's tempo, counting quarter notes in every time signature, and the Tempo slider gives way to a readout. In the browser it keeps its own Tempo (30–200 bpm, saved in patches), which counts the beat unit as before (eighths in 6/8). The page tells the engine it has its own clock with the `clock.own` message; without it (a plugin with its window closed, the render tool) the engine follows the transport.
 **Why:** the owner doesn't need a separate tempo in a DAW, where the pumping should lock to the song. The browser has no song, and patches made there carry their tempo.
@@ -464,7 +464,7 @@ every one of them. File and function names in them are reedorgan's; see
 **Why:** so they work from a DAW's MIDI track, not only from the page.
 **Page notes:** the page's own keys play on MIDI channel 2, so a MIDI keyboard holding the same key doesn't merge with them.
 
-## P5. MIDI controllers: the page in the browser, the engine in a DAW
+## P5. MIDI controllers: the page in the browser, the engine in a DAW (superseded by P8)
 
 **Chosen:** in the browser, the page moves the sliders from the mod wheel (Scoop), expression and foot pedals (Knee swell), breath (Direct wind), the volume knob (Direct wind or Volume) and learned controls, as reedorgan did. In a DAW there's no Learn (the DAW maps controllers); the engine applies the same fixed controllers itself, overriding the setting until it's moved.
 **Why:** a plugin page never sees MIDI (the host routes it to the engine).
@@ -478,3 +478,14 @@ every one of them. File and function names in them are reedorgan's; see
 
 **Chosen:** each rank's brightness is custom state (`voicing`), not a parameter. Changing it builds the rank's new periodic wave where custom state loads (never on the audio thread) and keeps built waves for reuse. The page sends it when you let go of a Brightness slider.
 **Why:** building a wave allocates. Brightness changes the sound only once you let go, where reedorgan changed it while dragging.
+
+## P8. The DAW's stand-ins come from synthkit
+
+**Chosen:** Parlour uses synthkit's own versions of what it had built for itself.
+- **Tempo:** the sequencer runs at the transport's tempo: the song's in a DAW, and in the browser synthkit's tempo control, which now sits in the sequencer's header (BPM, MIDI clock, beat lights) and is saved with the patch (`features.tempoInPatch`). The `seq.tempo` parameter and the `clock.own` message are gone; patch version 2 moves an old patch's `seq.tempo` into its tempo. The built-in voices keep their tempos (Factory 100, Lay Still 69, Reed Choir and Vocal Lead 74).
+- **Controllers:** the mod wheel (Scoop), expression and foot pedals (Knee swell) and breath (Direct wind) are declared on their parameters with `cc()`, and the volume knob's either-or (Direct wind while it's on, Volume otherwise) uses `ctx.setParam`. They work the same in the browser and a DAW, and the sliders, and the DAW's automation, follow. The page keeps only what synthkit can't know: MIDI Learn for Direct wind (when it's not the volume knob) and Vibrato delay, which it takes with `sk.takeMidi`.
+- **The host bar** shows the prompt to start the sound above the cabinet until it's running. The cabinet places Connect MIDI and the tempo itself, and keeps its own All notes off.
+- **Old patch files** load through `sk.presets.importPatch`, tempo included.
+**Why:** the owner wants MIDI and tempo to come out of the box for every synth. Both browser bugs fixed in PRs #2 and #3 came from Parlour's own wiring around these.
+**Differences:** the browser tempo counts quarter notes in every time signature, as a DAW does; reedorgan's counted eighths in 6/8, so a 6/8 pattern plays at half the speed it did at the same number. All four built-in voices are in 4/4. A breath or volume controller's moves now glide over 10 ms like a slider's, rather than jumping. Otherwise every scenario renders bit for bit as before.
+

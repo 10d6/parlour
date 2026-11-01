@@ -17,6 +17,10 @@ export function mount(sk, root) {
   page.sk = sk;
   page.root = root;
   for (const el of root.querySelectorAll("[data-mount]")) sk.mount(el, el.dataset.mount);
+  // synthkit's host bar keeps only what the cabinet doesn't place itself:
+  // the prompt to start the sound. The cabinet has its own All notes off, and
+  // Space works the treadles.
+  sk.hostBar({ panic: false, space: false });
   setupControls();
   setupStops();
   setupKeys();
@@ -28,7 +32,7 @@ export function mount(sk, root) {
 }
 
 // Load reedorgan patch…: a file downloaded from the reedorgan page becomes
-// one of your patches, under its own name.
+// one of your patches, under its own name, tempo included.
 function setupLegacyImport() {
   const { sk } = page;
   const btn = byId("patchImportOld"), input = byId("patchOldFile"), msg = byId("patchMsg");
@@ -39,13 +43,7 @@ function setupLegacyImport() {
     if (!f) return;
     const res = readLegacyFile(await f.text());
     if (res.error) { msg.textContent = res.error; return; }
-    sk.presets.init();
-    for (const [id, v] of Object.entries(res.params)) sk.set(id, v);
-    for (const [id, v] of Object.entries(res.custom)) sk.setCustom(id, v);
-    const taken = new Set(sk.presets.list().map((e) => e.name));
-    let name = res.name;
-    for (let k = 2; taken.has(name); k++) name = `${res.name.slice(0, 34)} (${k})`;
-    sk.presets.saveAs(name);
-    msg.textContent = `Loaded “${name}” from the file.`;
+    const out = sk.presets.importPatch({ name: res.name, params: res.params, custom: res.custom, tempo: res.tempo, patchVersion: 2 });
+    msg.textContent = out.ok ? `Loaded \u201c${out.name}\u201d from the file.` : `Couldn\u2019t load that file: ${out.error}`;
   });
 }

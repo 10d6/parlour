@@ -10,7 +10,7 @@ const dir = new URL("./reedorgan-patches/", import.meta.url);
 for (const file of readdirSync(dir).sort()) {
   const res = readLegacyFile(readFileSync(new URL(file, dir), "utf8"));
   if (res.error) throw new Error(`${file}: ${res.error}`);
-  const out = { synthkit: 1, synth: "parlour", patchVersion: 1, name: res.name, author: "Parlour", tags: [], params: res.params, custom: res.custom };
+  const out = { synthkit: 1, synth: "parlour", patchVersion: 2, name: res.name, author: "Parlour", tags: [], tempo: res.tempo, params: res.params, custom: res.custom };
   const name = file.replace(".reedorgan.json", ".json");
   writeFileSync(new URL(`../presets/${name}`, import.meta.url), JSON.stringify(out, null, 2) + "\n");
   console.log(`presets/${name}: ${res.name}, ${Object.keys(res.params).length} params`);

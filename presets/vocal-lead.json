@@ -1,10 +1,17 @@
 {
   "synthkit": 1,
   "synth": "parlour",
-  "patchVersion": 1,
+  "patchVersion": 2,
   "name": "Vocal Lead",
   "author": "Parlour",
   "tags": [],
+  "tempo": {
+    "bpm": 74,
+    "timeSig": [
+      4,
+      4
+    ]
+  },
   "params": {
     "wind.air": 0.9,
     "wind.direct": 1,
@@ -49,7 +56,6 @@
     "scoop.mode": 0,
     "scoop.curve": 0,
     "vib.mode": 0,
-    "seq.tempo": 74,
     "wind.helper": 2,
     "stops.split": 1,
     "compass": 0,

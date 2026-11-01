@@ -20,10 +20,10 @@ follow `INSTALL.md` inside. On Windows, copy the `.vst3` folder to
 (`v0.2.0`) publishes the zips as a release. The plugin window is the same
 cabinet as the browser page. In a DAW:
 
-- the sequencer follows the song's tempo (the Tempo slider is only in the browser);
-- MIDI comes from the track; map other controllers with the DAW's own MIDI
-  mapping (the mod wheel, breath, volume and expression controllers already
-  work as below);
+- the sequencer follows the song's tempo (in the browser it has its own Tempo, saved with the patch);
+- MIDI comes from the track. The mod wheel, breath, volume knob and expression
+  pedal work as below, and the DAW records their moves; map other controllers
+  with the DAW's own MIDI mapping;
 - your saved patches are shared by every copy of Parlour on the computer, and
   the sound is saved with your project.
 
@@ -116,7 +116,7 @@ cabinet as the browser page. In a DAW:
   the Vox Humana fan's speed and the knee swell in time, one pattern for each,
   all playing together. Rows are sweep shapes, up or down along Linear, Slow
   start, Fast start or S-curve; columns are 16th notes over 1 to 4 bars of
-  2/4, 3/4, 4/4, 5/4 or 6/8, at a tempo from 30 to 200 bpm in the browser; in a DAW it follows the song's tempo. Tap to place a
+  2/4, 3/4, 4/4, 5/4 or 6/8, at the Tempo beside it in the browser (saved with the patch, or following a MIDI clock); in a DAW it follows the song's tempo. Tap to place a
   shape, drag its ends to stretch it, Backspace to remove it. Each note moves
   its control by that pattern's *Amount* from wherever the last one left it,
   stopping at the ends of its range.

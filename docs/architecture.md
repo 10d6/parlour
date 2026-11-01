@@ -41,9 +41,7 @@ The page changes the sound only through the kit's bridge:
   reedorgan's format) and `voicing` (`{bright: [5 values]}`; loading it builds
   the rank waves, P7).
 - **Messages to the engine**: `treadle.left`, `treadle.right` (`[1]` down,
-  `[0]` up), `clock.own` (`[1]`: the sequencer keeps its own tempo; the
-  browser page sends it once the sound is running, P3. A message sent before
-  then would start the audio without a click, which browsers leave suspended), `notes.off`.
+  `[0]` up), `notes.off`.
 - **Messages from the engine**: `key` `[note, 1|0]` (light the key, coupled
   octaves included), `pedal.stage` `[foot, stage, relFrom]` (0 idle,
   1 attack, 2 decay, 3 sustain, 4 release), `wind.status` `[code]` (the line
@@ -53,6 +51,13 @@ The page changes the sound only through the kit's bridge:
   `flow.left`/`flow.right`, `seq.free`/`seq.keys` (the treadle and key-driven
   passes' position, 0–1, or −1 when stopped), `vox.fan` (fan speed).
 - The page's own keys play on **MIDI channel 2** (P4).
+- **Tempo** (P8): the transport's (`ctx.transport().bpm`). In the browser,
+  synthkit's tempo control in the sequencer's header, saved with the patch
+  (`features.tempoInPatch`); in a DAW, the song's.
+- **MIDI controllers** (P8): `scoop.depth` ← CC 1, `swell` ← CC 11 and CC 4,
+  `wind.air` ← CC 2, declared with `cc()`; CC 7 → `wind.air` or `volume` in
+  `processEvents` with `ctx.setParam`. The page takes learned controls with
+  `sk.takeMidi` (`keys.js`).
 
 ## Signal flow
 

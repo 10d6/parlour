@@ -1,9 +1,16 @@
 {
   "synthkit": 1,
   "synth": "parlour",
-  "patchVersion": 1,
+  "patchVersion": 2,
   "name": "Factory",
   "author": "Parlour",
   "tags": [],
+  "tempo": {
+    "bpm": 100,
+    "timeSig": [
+      4,
+      4
+    ]
+  },
   "params": {}
 }

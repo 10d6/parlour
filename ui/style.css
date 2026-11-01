@@ -339,3 +339,16 @@ kbd{font-family:var(--f-body);font-size:13px;border:1px solid var(--brass-dim);b
 .patch-kit .preset-field{flex:1 1 auto;min-width:0}
 .patch-kit .preset-field select{min-width:0;width:100%}
 @media (max-width:560px){.patch-kit{flex-basis:100%}}
+/* synthkit's host bar (above the cabinet): here only the prompt to start the sound */
+.sk-hostbar{max-width:1000px;margin:0 auto 12px;background:linear-gradient(180deg,#2e1a10,#1f120b);border:1px solid var(--brass-dim);border-radius:8px;font-family:var(--f-label)}
+.sk-hostbar .start-banner{font-family:var(--f-label);font-size:15px;color:var(--text);border-color:var(--brass)}
+.sk-hostbar .start-dot{background:var(--brass)}
+/* synthkit's tempo control in the sequencer's header. The organ keeps its own
+   time signature (Time) and runs whether or not the clock is "playing", so
+   only the BPM, the MIDI clock choice and the beat lights show. */
+.seq-tempo{flex:1 1 220px}
+.seq-tempo-kit .tempo{gap:8px}
+.seq-tempo-kit .play-btn,.seq-tempo-kit .tempo > .sig-select:first-of-type{display:none}
+.seq-tempo-kit .bpm{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-label);font-size:14px;color:var(--muted)}
+.seq-tempo-kit .bpm-input{width:4.5em;font:inherit;font-size:15px;color:var(--text);background:#2e1a10;border:1px solid var(--brass-dim);border-radius:6px;padding:3px 6px}
+.seq-tempo-kit .tempo-readout{font-family:var(--f-label);font-size:14px;color:var(--text)}
