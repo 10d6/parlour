@@ -36,6 +36,10 @@ const check = (ok, what) => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${what}`);
         return this.__tap;
       },
     });
+    // A fake MIDI keyboard (as reedorgan's tests had): window.__midi(status, d1, d2).
+    const input = { id: "1", name: "Test Keyboard", state: "connected", type: "input", onmidimessage: null, addEventListener() {} };
+    window.__midi = (a, b, c) => input.onmidimessage && input.onmidimessage({ data: new Uint8Array([a, b, c]) });
+    navigator.requestMIDIAccess = async () => ({ inputs: new Map([["1", input]]), outputs: new Map(), onstatechange: null, addEventListener() {} });
     window.__rms = () => { const a = window.__an; if (!a) return 0; const x = new Float32Array(a.fftSize); a.getFloatTimeDomainData(x); let s = 0; for (const v of x) s += v * v; return Math.sqrt(s / x.length); };
   });
   await page.goto("file://" + path.resolve(htmlPath));
@@ -110,6 +114,24 @@ const check = (ok, what) => { console.log(`  ${ok ? "PASS" : "FAIL"}  ${what}`);
   await page.setInputFiles("#patchOldFile", path.resolve(__dirname, "../tools/reedorgan-patches/vocal-lead.reedorgan.json"));
   await page.waitForTimeout(500);
   check(/Loaded/.test(await text("#patchMsg")), `Load reedorgan patch… loads a file ("${await text("#patchMsg")}")`);
+
+  // A MIDI keyboard: Connect MIDI, then notes, sustain and the expression pedal
+  await page.getByRole("button", { name: /Connect MIDI/i }).first().click();
+  await page.waitForTimeout(400);
+  await page.evaluate(() => window.__midi(0x90, 67, 100));
+  await page.waitForTimeout(500);
+  check(await lit(67), "a MIDI keyboard's note plays (G4 lights)");
+  const midiRms = await page.evaluate(() => window.__rms());
+  check(midiRms > 0.01, `a MIDI note sounds (RMS ${midiRms.toFixed(3)})`);
+  await page.evaluate(() => { window.__midi(0xb0, 64, 127); window.__midi(0x80, 67, 0); });
+  await page.waitForTimeout(300);
+  check(await lit(67), "the sustain pedal holds a MIDI note after its key comes up");
+  await page.evaluate(() => window.__midi(0xb0, 64, 0));
+  await page.waitForTimeout(300);
+  check(!(await lit(67)), "letting the sustain pedal up lets the note go");
+  await page.evaluate(() => window.__midi(0xb0, 11, 127));
+  await page.waitForTimeout(200);
+  check((await text("#swellOut")) === "Full", `a MIDI expression pedal moves the knee swell ("${await text("#swellOut")}")`);
 
   // Info buttons
   await page.locator('[data-info="adjust"] .info-btn').first().click();
